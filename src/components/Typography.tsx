@@ -16,6 +16,8 @@ import {
   renderChildrenWithEmoji,
   type TextProps,
 } from '#/alf/typography'
+import {GradientNameText} from '#/features/avatarDecorations/GradientNameText'
+import {nameGradientTextStyle} from '#/features/avatarDecorations/nameGradientStyle'
 
 export type {TextProps}
 export {Text as Span} from 'react-native'
@@ -26,6 +28,7 @@ export {Text as Span} from 'react-native'
 export function Text({
   children,
   emoji,
+  gradient,
   style,
   selectable,
   title,
@@ -43,6 +46,8 @@ export function Text({
       a.leading_snug,
       web(numberOfLines === 1 && numberOfLinesClippingFix),
       style,
+      // Last so `color: transparent` beats the theme text color.
+      web(gradient && nameGradientTextStyle(gradient)),
     ],
     {
       fontScale: allowFontScaling ? fonts.scaleMultiplier : 1,
@@ -79,7 +84,11 @@ export function Text({
 
   return (
     <UITextView {...shared}>
-      {renderChildrenWithEmoji(children, shared, emoji ?? false)}
+      {gradient && typeof children === 'string' ? (
+        <GradientNameText gradient={gradient}>{children}</GradientNameText>
+      ) : (
+        renderChildrenWithEmoji(children, shared, emoji ?? false)
+      )}
     </UITextView>
   )
 }

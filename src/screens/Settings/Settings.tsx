@@ -76,6 +76,7 @@ import {
   PersonX_Stroke2_Corner0_Rounded as PersonXIcon,
 } from '#/components/icons/Person'
 import {RaisingHand4Finger_Stroke2_Corner2_Rounded as HandIcon} from '#/components/icons/RaisingHand'
+import {Sparkle_Stroke2_Corner0_Rounded as SparkleIcon} from '#/components/icons/Sparkle'
 import {Window_Stroke2_Corner2_Rounded as WindowIcon} from '#/components/icons/Window'
 import * as Layout from '#/components/Layout'
 import {Loader} from '#/components/Loader'
@@ -87,6 +88,12 @@ import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
 import {useAnalytics} from '#/analytics'
 import {IS_INTERNAL, IS_IOS, IS_NATIVE} from '#/env'
+import {
+  useAvatarDecoration,
+  useAvatarShape,
+  useNameGradient,
+  useNameStyle,
+} from '#/features/avatarDecorations'
 import {useActorStatus} from '#/features/liveNow'
 import {useActiveThemeUpdate} from '#/features/themes/api'
 import {type app} from '#/lexicons'
@@ -506,6 +513,14 @@ export function SettingsScreen({}: Props) {
             )}
           </SettingsList.LinkItem>
           <SettingsList.LinkItem
+            to="/settings/decorations"
+            label={l`Profile decorations`}>
+            <SettingsList.ItemIcon icon={SparkleIcon} />
+            <SettingsList.ItemText>
+              <Trans>Profile decorations</Trans>
+            </SettingsList.ItemText>
+          </SettingsList.LinkItem>
+          <SettingsList.LinkItem
             to="/settings/accessibility"
             label={l`Accessibility`}>
             <SettingsList.ItemIcon icon={AccessibilityIcon} />
@@ -590,6 +605,10 @@ function ProfilePreview({
   const moderationOpts = useModerationOpts()
   const hideDisplayNames = useHideDisplayNames()
   const {isActive: live} = useActorStatus(profile)
+  const decoration = useAvatarDecoration(profile.did)
+  const profileShape = useAvatarShape(profile.did)
+  const nameGradient = useNameGradient(profile.did)
+  const nameStyle = useNameStyle(profile.did)
 
   if (!moderationOpts) return null
 
@@ -598,6 +617,7 @@ function ProfilePreview({
     hideDisplayNames,
     moderation: moderation.ui('displayName'),
   })
+  const decorated = !hideDisplayNames && !moderation.ui('displayName').blur
 
   return (
     <>
@@ -607,6 +627,8 @@ function ProfilePreview({
         moderation={moderation.ui('avatar')}
         type={shadow.associated?.labeler ? 'labeler' : 'user'}
         live={live}
+        decoration={decoration}
+        profileShape={profileShape}
       />
 
       <View
@@ -621,11 +643,13 @@ function ProfilePreview({
           emoji
           testID="profileHeaderDisplayName"
           numberOfLines={1}
+          gradient={decorated ? nameGradient : undefined}
           style={[
             a.pt_sm,
             t.atoms.text,
             gtMobile ? a.text_4xl : a.text_3xl,
             a.font_bold,
+            decorated && nameStyle,
           ]}>
           {displayName}
         </Text>

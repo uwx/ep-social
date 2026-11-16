@@ -37,6 +37,10 @@ import {LabelsOnMe} from '#/components/moderation/LabelsOnMe'
 import {ProfileHeaderAlerts} from '#/components/moderation/ProfileHeaderAlerts'
 import {useAnalytics} from '#/analytics'
 import {IS_IOS} from '#/env'
+import {
+  useAvatarDecoration,
+  useAvatarShape,
+} from '#/features/avatarDecorations'
 import {useActorStatus} from '#/features/liveNow'
 import {EditLiveDialog} from '#/features/liveNow/components/EditLiveDialog'
 import {LiveIndicator} from '#/features/liveNow/components/LiveIndicator'
@@ -148,6 +152,8 @@ let ProfileHeaderShell = ({
   )
 
   const live = useActorStatus(profile)
+  const decoration = useAvatarDecoration(profile.did)
+  const profileShape = useAvatarShape(profile.did)
 
   useEffect(() => {
     if (live.isActive) {
@@ -301,12 +307,14 @@ let ProfileHeaderShell = ({
           accessibilityHint="">
           <View
             style={[
-              t.atoms.bg,
+              // A decorated shape draws its own outline, so the surrounding
+              // ring would double up on it.
+              profileShape ? {backgroundColor: 'transparent'} : t.atoms.bg,
               a.rounded_full,
               {
                 width: 94,
                 height: 94,
-                borderWidth: live.isActive ? 3 : 2,
+                borderWidth: profileShape ? 0 : live.isActive ? 3 : 2,
                 borderColor: live.isActive
                   ? t.palette.negative_500
                   : t.atoms.bg.backgroundColor,
@@ -326,6 +334,8 @@ let ProfileHeaderShell = ({
                 size={live.isActive ? 88 : 90}
                 avatar={profile.avatar}
                 moderation={moderation.ui('avatar')}
+                decoration={decoration}
+                profileShape={profileShape}
                 noBorder
               />
               {live.isActive && <LiveIndicator size="large" />}

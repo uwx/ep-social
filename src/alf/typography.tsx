@@ -56,6 +56,11 @@ export function normalizeTextStyles(
 export type StringChild = string | (string | null)[]
 export type TextProps = RNTextProps & {
   /**
+   * Paints the text with a horizontal gradient. Only meaningful for a single
+   * string of text, e.g. a display name.
+   */
+  gradient?: {colors: string[]; segmented?: boolean}
+  /**
    * Lets the user select text, to use the native copy and paste functionality.
    */
   selectable?: boolean

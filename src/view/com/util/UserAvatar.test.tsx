@@ -42,6 +42,12 @@ jest.mock('#/components/Link', () => ({}))
 jest.mock('#/components/Menu', () => ({}))
 jest.mock('#/components/ProfileHoverCard', () => ({}))
 jest.mock('#/analytics', () => ({}))
+jest.mock('#/features/avatarDecorations', () => ({
+  AvatarDecorationRing: () => null,
+  HexagonAvatar: () => null,
+  useAvatarDecoration: () => undefined,
+  useAvatarShape: () => undefined,
+}))
 jest.mock('#/features/liveNow', () => ({}))
 jest.mock('#/features/liveNow/components/LiveIndicator', () => ({}))
 jest.mock('#/features/liveNow/components/LiveStatusDialog', () => ({}))

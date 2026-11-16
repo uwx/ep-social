@@ -198,6 +198,7 @@ import {
   IS_WEB,
   IS_WEB_SAFARI,
 } from '#/env'
+import {useAvatarDecoration, useAvatarShape} from '#/features/avatarDecorations'
 import {BluemojiPickerButton} from '#/features/bluemoji/Picker'
 import {getBluemojiInsertionName} from '#/features/bluemoji/util'
 import {type Gif} from '#/features/gifPicker/types'
@@ -2215,12 +2216,7 @@ let ComposerPost = memo(function ComposerPost({
                 ),
                 a.self_start,
               ]}>
-              <UserAvatar
-                avatar={currentProfile?.avatar}
-                size={42}
-                type={currentProfile?.associated?.labeler ? 'labeler' : 'user'}
-                style={[a.mt_xs]}
-              />
+              <ComposerAvatar profile={currentProfile} />
             </Button>
           )}
         />
@@ -2636,6 +2632,30 @@ function AltTextReminder({
         )}
       </View>
     </Admonition>
+  )
+}
+
+/**
+ * The active account's avatar in the composer. Decorations belong to the
+ * profile being posted from, which can differ from the signed-in account while
+ * the ephemeral switcher is open.
+ */
+function ComposerAvatar({
+  profile,
+}: {
+  profile?: app.bsky.actor.defs.ProfileViewDetailed
+}) {
+  const decoration = useAvatarDecoration(profile?.did)
+  const profileShape = useAvatarShape(profile?.did)
+  return (
+    <UserAvatar
+      avatar={profile?.avatar}
+      size={42}
+      type={profile?.associated?.labeler ? 'labeler' : 'user'}
+      decoration={decoration}
+      profileShape={profileShape}
+      style={[a.mt_xs]}
+    />
   )
 }
 

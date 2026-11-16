@@ -215,6 +215,10 @@ const AppearanceSettingsScreen = deferredNamedScreen(
   () => require('#/screens/Settings/AppearanceSettings'),
   'AppearanceSettingsScreen',
 )
+const DecorationsSettingsScreen = deferredNamedScreen(
+  () => require('#/screens/Settings/DecorationsSettings'),
+  'DecorationsSettingsScreen',
+)
 const AppearanceColorThemeSettingsScreen = deferredNamedScreen(
   () => require('#/screens/Settings/AppearanceSettings/ColorThemeSettings'),
   'AppearanceColorThemeSettingsScreen',
@@ -761,6 +765,14 @@ function commonScreens(Stack: typeof Flat, unreadCountLabel?: string) {
         name="RunesSettingsSyncSettings"
         getComponent={() => RunesSettingsSyncSettingsScreen}
         options={{title: title(msg`Settings sync`), requireAuth: true}}
+      />
+      <Stack.Screen
+        name="DecorationsSettings"
+        getComponent={() => DecorationsSettingsScreen}
+        options={{
+          title: title(msg`Profile decorations`),
+          requireAuth: true,
+        }}
       />
       <Stack.Screen
         name="AppearanceSettings"
