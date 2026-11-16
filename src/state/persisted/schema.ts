@@ -362,6 +362,7 @@ const schema = z.object({
   deckLayoutEnabled: z.boolean().optional(),
   hideQuotesOfBlockedAccounts: z.boolean().optional(),
   hideBluemojiReactions: z.boolean().optional(),
+  hideOwnFictionkinBadge: z.boolean().optional(),
   pdsLabel: z
     .object({
       enabled: z.boolean(),
@@ -570,6 +571,7 @@ export const defaults: Schema = {
   deckLayoutEnabled: false,
   hideQuotesOfBlockedAccounts: false,
   hideBluemojiReactions: false,
+  hideOwnFictionkinBadge: false,
   pdsLabel: {
     enabled: true,
     hideBskyPds: true,

@@ -101,6 +101,7 @@ export type CommonNavigatorParams = {
   AccountSettings: undefined
   AutomationLabelSettings: undefined
   PetLabelSettings: undefined
+  FictionkinBadgeSettings: undefined
   PrivacyAndSecuritySettings: undefined
   ActivityPrivacySettings: undefined
   ContentAndMediaSettings: undefined

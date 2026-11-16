@@ -35,6 +35,7 @@ import {Provider as HiddenPostsProvider} from './hidden-posts'
 import {Provider as HideBluemojiReactionsProvider} from './hide-bluemoji-reactions'
 import {Provider as HideDisplayNamesProvider} from './hide-display-names'
 import {Provider as HideFeedsPromoTabProvider} from './hide-feeds-promo-tab'
+import {Provider as HideOwnFictionkinBadgeProvider} from './hide-own-fictionkin-badge'
 import {Provider as HideQuotesOfBlockedAccountsProvider} from './hide-quotes-of-blocked-accounts'
 import {Provider as HideScaryFollowButtonsProvider} from './hide-scary-follow-buttons.tsx'
 import {Provider as HideSimilarAccountsRecommProvider} from './hide-similar-accounts-recommendations'
@@ -267,6 +268,7 @@ export function Provider({children}: PropsWithChildren<{}>) {
                                                                                                                                                   <TokimekiInstanceProvider>
                                                                                                                                                     <DisableInfiniteScrollProvider>
                                                                                                                                                       <HideBluemojiReactionsProvider>
+                                                                                                                                                        <HideOwnFictionkinBadgeProvider>
                                                                                                                                                         <HideQuotesOfBlockedAccountsProvider>
                                                                                                                                                           <ReplyIconIndicatorsProvider>
                                                                                                                                                             <ShowPostTagsProvider>
@@ -286,6 +288,7 @@ export function Provider({children}: PropsWithChildren<{}>) {
                                                                                                                                                             </ShowPostTagsProvider>
                                                                                                                                                           </ReplyIconIndicatorsProvider>
                                                                                                                                                         </HideQuotesOfBlockedAccountsProvider>
+                                                                                                                                                        </HideOwnFictionkinBadgeProvider>
                                                                                                                                                       </HideBluemojiReactionsProvider>
                                                                                                                                                     </DisableInfiniteScrollProvider>
                                                                                                                                                   </TokimekiInstanceProvider>

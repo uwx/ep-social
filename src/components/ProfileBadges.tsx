@@ -8,12 +8,14 @@ import {useProfileShadow} from '#/state/cache/profile-shadow'
 import {type Shadow} from '#/state/cache/types'
 import {usePdsProfilePriority} from '#/state/pds-viewability'
 import {useDeerVerification} from '#/state/preferences/deer-verification'
+import {useHideOwnFictionkinBadge} from '#/state/preferences/hide-own-fictionkin-badge'
 import {
   usePdsLabelEnabled,
   usePdsLabelHideBskyPds,
 } from '#/state/preferences/pds-label'
 import {useDeerVerificationProfileOverlay} from '#/state/queries/deer-verification'
 import {usePdsFaviconUrl, usePdsLabelQuery} from '#/state/queries/pds-label'
+import {useSession} from '#/state/session'
 import {useTickEveryMinute} from '#/state/shell'
 import {atoms as a, useAlf, useTheme, type ViewStyleProp} from '#/alf'
 import {useNativeFontScale} from '#/alf/util/dimensions'
@@ -21,6 +23,11 @@ import {BotBadge, BotBadgeButton, isBotAccount} from '#/components/BotBadge'
 import {Button} from '#/components/Button'
 import {CakeDayBadge} from '#/components/CakeDayBadge'
 import * as Dialog from '#/components/Dialog'
+import {
+  FictionkinBadgeButton,
+  FictionkinBadgeForProfile,
+  isFictionkinAccount,
+} from '#/components/FictionkinBadge'
 import {PdsBadgeIcon, PdsDialog} from '#/components/PdsDialog'
 import {isPetAccount, PetBadge, PetBadgeButton} from '#/components/PetBadge'
 import {isPvpAccount, PvpBadge} from '#/components/PvpBadge'
@@ -133,6 +140,11 @@ export function ProfileBadgesFromProfileShadow({
    */
   const cakeDayTick = useTickEveryMinute(isCakeDay(shadowed.createdAt))
   const showCake = cakeDayTick > 0 && isCakeDay(shadowed.createdAt, cakeDayTick)
+  const {currentAccount} = useSession()
+  const hideOwnFictionkinBadge = useHideOwnFictionkinBadge()
+  const showFictionkinBadge =
+    isFictionkinAccount(shadowed) &&
+    !(hideOwnFictionkinBadge && currentAccount?.did === shadowed.did)
   const badgeVisibility = [
     verification.showBadge,
     isBetaBadgeVisible,
@@ -140,6 +152,7 @@ export function ProfileBadgesFromProfileShadow({
     isPetAccount(shadowed),
     isPvpAccount(shadowed),
     showCake,
+    showFictionkinBadge,
   ]
   const badgeCount = badgeVisibility.filter(Boolean).length
 
@@ -226,6 +239,13 @@ export function ProfileBadgesFromProfileShadow({
               hitSlop={hitSlops[5]}
             />
           )}
+          {showFictionkinBadge && (
+            <FictionkinBadgeButton
+              profile={shadowed}
+              width={botIconWidth}
+              hitSlop={hitSlops[6]}
+            />
+          )}
         </>
       ) : (
         <>
@@ -265,6 +285,12 @@ export function ProfileBadgesFromProfileShadow({
             allowFontScaling={allowFontScaling}
           />
           {showCake && <CakeDayBadge width={botIconWidth} />}
+          {showFictionkinBadge && (
+            <FictionkinBadgeForProfile
+              profile={shadowed}
+              width={botIconWidth}
+            />
+          )}
         </>
       )}
     </View>

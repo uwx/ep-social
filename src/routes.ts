@@ -83,6 +83,7 @@ export const router = new Router<AllNavigatableRoutes>({
   AccountSettings: '/settings/account',
   AutomationLabelSettings: '/settings/automation-label',
   PetLabelSettings: '/settings/pet-label',
+  FictionkinBadgeSettings: '/settings/fictionkin-badge',
   PrivacyAndSecuritySettings: '/settings/privacy-and-security',
   ActivityPrivacySettings: '/settings/privacy-and-security/activity',
   ContentAndMediaSettings: '/settings/content-and-media',

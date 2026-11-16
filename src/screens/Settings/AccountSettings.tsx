@@ -14,6 +14,7 @@ import {
   EmailDialogScreenID,
   useEmailDialogControl,
 } from '#/components/dialogs/EmailDialog'
+import {isFictionkinAccount} from '#/components/FictionkinBadge'
 import {At_Stroke2_Corner2_Rounded as AtIcon} from '#/components/icons/At'
 import {BirthdayCake_Stroke2_Corner2_Rounded as BirthdayCakeIcon} from '#/components/icons/BirthdayCake'
 import {Bot_Stroke2_Corner0_Rounded as RobotIcon} from '#/components/icons/Bot'
@@ -23,6 +24,7 @@ import {Freeze_Stroke2_Corner2_Rounded as FreezeIcon} from '#/components/icons/F
 import {Lock_Stroke2_Corner2_Rounded as LockIcon} from '#/components/icons/Lock'
 import {PencilLine_Stroke2_Corner2_Rounded as PencilIcon} from '#/components/icons/Pencil'
 import {Pet_Stroke as PetIcon} from '#/components/icons/Pet'
+import {Shapes_Stroke2_Corner0_Rounded as ShapesIcon} from '#/components/icons/Shapes'
 import {ShieldCheck_Stroke2_Corner0_Rounded as ShieldIcon} from '#/components/icons/Shield'
 import {Trash_Stroke2_Corner2_Rounded} from '#/components/icons/Trash'
 import * as Layout from '#/components/Layout'
@@ -178,6 +180,19 @@ export function AccountSettingsScreen({}: Props) {
             {profile && (
               <SettingsList.BadgeText>
                 {isPetAccount(profile) ? l`On` : l`Off`}
+              </SettingsList.BadgeText>
+            )}
+          </SettingsList.LinkItem>
+          <SettingsList.LinkItem
+            to="/settings/fictionkin-badge"
+            label={l`Fictionkin badge`}>
+            <SettingsList.ItemIcon icon={ShapesIcon} />
+            <SettingsList.ItemText>
+              <Trans>Fictionkin badge</Trans>
+            </SettingsList.ItemText>
+            {profile && (
+              <SettingsList.BadgeText>
+                {isFictionkinAccount(profile) ? l`On` : l`Off`}
               </SettingsList.BadgeText>
             )}
           </SettingsList.LinkItem>

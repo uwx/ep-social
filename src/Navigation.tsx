@@ -287,6 +287,10 @@ const PetLabelSettingsScreen = deferredNamedScreen(
   () => require('#/screens/Settings/PetLabelSettings'),
   'PetLabelSettingsScreen',
 )
+const FictionkinBadgeSettingsScreen = deferredNamedScreen(
+  () => require('#/screens/Settings/FictionkinBadgeSettings'),
+  'FictionkinBadgeSettingsScreen',
+)
 const PrivacyAndSecuritySettingsScreen = deferredNamedScreen(
   () => require('#/screens/Settings/PrivacyAndSecuritySettings'),
   'PrivacyAndSecuritySettingsScreen',
@@ -834,6 +838,14 @@ function commonScreens(Stack: typeof Flat, unreadCountLabel?: string) {
         getComponent={() => PetLabelSettingsScreen}
         options={{
           title: title(msg`Pet Label`),
+          requireAuth: true,
+        }}
+      />
+      <Stack.Screen
+        name="FictionkinBadgeSettings"
+        getComponent={() => FictionkinBadgeSettingsScreen}
+        options={{
+          title: title(msg`Fictionkin badge`),
           requireAuth: true,
         }}
       />
