@@ -159,6 +159,7 @@ import {TagsBtn} from '#/view/com/composer/tags/TagsBtn'
 // TODO: Prevent naming components that coincide with RN primitives
 // due to linting false positives
 import {TextInput} from '#/view/com/composer/text-input/TextInput'
+import {getEmptyPostBackspaceAction} from '#/view/com/composer/text-input/thread-shortcuts'
 import {TextSyntaxHelp} from '#/view/com/composer/TextSyntaxHelp'
 import {ThreadgateBtn} from '#/view/com/composer/threadgate/ThreadgateBtn'
 import {SubtitleDialogBtn} from '#/view/com/composer/videos/SubtitleDialog'
@@ -356,7 +357,8 @@ export const ComposePost = ({
   const {closeComposer, minimizeComposer} = useComposerControls()
   const shellComposerState = useComposerState()
   const isComposerOpen = !!shellComposerState
-  const isComposerVisible = isComposerOpen && !shellComposerState.isMinimized
+  const isComposerMinimized = shellComposerState?.isMinimized
+  const isComposerVisible = isComposerOpen && !isComposerMinimized
   const showEphemeralError = useEphemeralAccountError()
   const {t: l, i18n} = useLingui()
   const forceAltTextEnabled = useForceAltTextEnabled()
@@ -504,9 +506,20 @@ export const ComposePost = ({
 
   useLayoutEffect(() => {
     if (isComposerOpen) {
-      saveRecovery(currentDid, {activeAccountDid, replyTo}, composerState)
+      saveRecovery(
+        currentDid,
+        {activeAccountDid, replyTo, isMinimized: isComposerMinimized},
+        composerState,
+      )
     }
-  }, [isComposerOpen, currentDid, activeAccountDid, replyTo, composerState])
+  }, [
+    isComposerOpen,
+    isComposerMinimized,
+    currentDid,
+    activeAccountDid,
+    replyTo,
+    composerState,
+  ])
 
   const thread = composerState.thread
   const target = shellComposerState?.target
@@ -1955,6 +1968,9 @@ export const ComposePost = ({
                 isReply={index > 0 || !!replyTo}
                 isActive={post.id === activePost.id}
                 canRemovePost={thread.posts.length > 1}
+                onCloseEmpty={
+                  isComposerEmpty && !isPublishing ? onClose : undefined
+                }
                 canMovePostUp={index > 0}
                 canMovePostDown={index < thread.posts.length - 1}
                 canAddPost={post.id === activePost.id && canAddPost}
@@ -2043,6 +2059,7 @@ let ComposerPost = memo(function ComposerPost({
   isLastPost,
   isPartOfThread,
   canRemovePost,
+  onCloseEmpty,
   canMovePostUp,
   canMovePostDown,
   canAddPost,
@@ -2064,6 +2081,7 @@ let ComposerPost = memo(function ComposerPost({
   isLastPost: boolean
   isPartOfThread: boolean
   canRemovePost: boolean
+  onCloseEmpty?: () => void
   canMovePostUp: boolean
   canMovePostDown: boolean
   canAddPost: boolean
@@ -2240,11 +2258,18 @@ let ComposerPost = memo(function ComposerPost({
           canMovePostUp={canMovePostUp}
           canMovePostDown={canMovePostDown}
           onBackspaceEmpty={() => {
-            if (!canRemovePost || isFirstPost || !isEmptyPost(post)) {
-              return false
+            const action = getEmptyPostBackspaceAction({
+              hasContent: postHasContent(post),
+              isFirstPost,
+              canRemovePost,
+              canCloseComposer: !!onCloseEmpty,
+            })
+            if (action === 'close-composer') {
+              onCloseEmpty?.()
+            } else if (action === 'remove-post') {
+              dispatch({type: 'remove_post', postId: post.id})
             }
-            dispatch({type: 'remove_post', postId: post.id})
-            return true
+            return !!action
           }}
           onAddPost={onAddPost}
           onMovePost={onMovePost}
