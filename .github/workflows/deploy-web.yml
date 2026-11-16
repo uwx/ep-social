@@ -97,10 +97,19 @@ jobs:
       - name: Check browser support
         run: pnpm check-web-browser-support
 
+      # The commit message goes through env, never inline: GitHub substitutes
+      # ${{ }} into the script text before bash parses it, so a message holding
+      # a double quote (e.g. `fix(ci): retry "on (503)"`) closes the quoting
+      # early and the following `(` is a syntax error, which fails the deploy.
+      # An env value is passed as data and the shell only ever sees the variable.
+      # The branch name is user-controlled too, so it takes the same route.
       - name: Deploy to Cloudflare Pages
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message || github.sha }}
+          BRANCH_NAME: ${{ github.ref_name }}
         run: >
           pnpm exec wrangler pages deploy dist
           --project-name="${{ vars.CF_PAGES_PROJECT || 'witchsky' }}"
-          --branch="${{ github.ref_name }}"
+          --branch="$BRANCH_NAME"
           --commit-hash="${{ github.sha }}"
-          --commit-message="${{ github.event.head_commit.message || github.sha }}"
+          --commit-message="$COMMIT_MESSAGE"
