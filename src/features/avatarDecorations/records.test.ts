@@ -1,122 +1,14 @@
 import {
   buildDecorationRecord,
   getDecorationSettings,
-  hasDecorationEntitlement,
   parseDecorationSettings,
   SETTINGS_COLLECTION,
   SETTINGS_RKEY,
 } from './records'
 
-const PROD_LIST =
-  'at://did:plc:issuer/app.bsky.graph.list/production-subscribers'
-const TEST_LIST = 'at://did:plc:issuer/app.bsky.graph.list/test-subscribers'
 const SUBJECT = 'did:plc:subscriber'
-const CONSTELLATION = 'https://constellation.microcosm.blue'
 const SLINGSHOT = 'https://slingshot.microcosm.blue'
 const originalFetch = global.fetch
-
-describe('hasDecorationEntitlement', () => {
-  let fetchMock: jest.MockedFunction<typeof fetch>
-
-  beforeEach(() => {
-    fetchMock = jest.fn()
-    global.fetch = fetchMock
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-  })
-
-  function respond(body: unknown, status = 200) {
-    fetchMock.mockResolvedValue({
-      ok: status < 400,
-      status,
-      json: () => Promise.resolve(body),
-    } as Response)
-  }
-
-  it('checks every configured list in one many-to-many request', async () => {
-    respond({
-      items: [
-        {
-          linkRecord: {
-            did: 'did:plc:issuer',
-            collection: 'app.bsky.graph.listitem',
-            rkey: 'manual-tid',
-          },
-          otherSubject: TEST_LIST,
-        },
-      ],
-    })
-
-    await expect(
-      hasDecorationEntitlement(SUBJECT, CONSTELLATION, [PROD_LIST, TEST_LIST]),
-    ).resolves.toBe(true)
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-
-    const url = new URL(fetchMock.mock.calls[0][0] as string)
-    expect(url.origin).toBe(CONSTELLATION)
-    expect(url.pathname).toBe('/xrpc/blue.microcosm.links.getManyToMany')
-    expect(url.searchParams.get('subject')).toBe(SUBJECT)
-    expect(url.searchParams.get('source')).toBe(
-      'app.bsky.graph.listitem:subject',
-    )
-    expect(url.searchParams.get('pathToOther')).toBe('list')
-    expect(url.searchParams.getAll('otherSubject')).toEqual([
-      PROD_LIST,
-      TEST_LIST,
-    ])
-    expect(url.searchParams.getAll('did')).toEqual(['did:plc:issuer'])
-  })
-
-  it('rejects a match whose listitem is owned by someone else', async () => {
-    respond({
-      items: [
-        {
-          linkRecord: {
-            did: 'did:plc:someone-else',
-            collection: 'app.bsky.graph.listitem',
-            rkey: 'spoofed',
-          },
-          otherSubject: PROD_LIST,
-        },
-      ],
-    })
-
-    await expect(
-      hasDecorationEntitlement(SUBJECT, CONSTELLATION, [PROD_LIST]),
-    ).resolves.toBe(false)
-  })
-
-  it('rejects a match for a different list uri', async () => {
-    respond({
-      items: [
-        {
-          linkRecord: {
-            did: 'did:plc:issuer',
-            collection: 'app.bsky.graph.listitem',
-            rkey: 'other',
-          },
-          otherSubject: 'at://did:plc:issuer/app.bsky.graph.list/unrelated',
-        },
-      ],
-    })
-
-    await expect(
-      hasDecorationEntitlement(SUBJECT, CONSTELLATION, [PROD_LIST]),
-    ).resolves.toBe(false)
-  })
-
-  it('does not query when no configured uri is a usable list', async () => {
-    await expect(
-      hasDecorationEntitlement(SUBJECT, CONSTELLATION, [
-        'at://did:plc:issuer/app.bsky.feed.post/1',
-        'not-a-uri',
-      ]),
-    ).resolves.toBe(false)
-    expect(fetchMock).not.toHaveBeenCalled()
-  })
-})
 
 describe('getDecorationSettings', () => {
   let fetchMock: jest.MockedFunction<typeof fetch>

@@ -1,72 +1,46 @@
 import {type TextStyle} from 'react-native'
 import {type Client} from '@atproto/lex'
 import {type DidString} from '@atproto/syntax'
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
 import {useDeferredEnable} from '#/lib/hooks/useDeferredEnable'
 import {isRecordNotFoundError} from '#/lib/xrpc-error'
-import {useConstellationInstance} from '#/state/preferences/constellation-instance'
 import {useSlingshotInstance} from '#/state/preferences/slingshot-instance'
 import {STALE} from '#/state/queries'
 import {createQueryKey} from '#/state/queries/util'
 import {usePdsClient, useSession} from '#/state/session'
 import {com} from '#/lexicons'
 import {type DecorationFrame, getFrame} from './catalog'
-import {DECORATION_LIST_URIS, DECORATIONS_ENABLED} from './config'
 import {getNameGradient, type NameGradient} from './nameGradients'
 import {nameGradientTextStyle} from './nameGradientStyle'
 import {
   buildDecorationRecord,
   type DecorationSettings,
   getDecorationSettings,
-  hasDecorationEntitlement,
   parseDecorationSettings,
   SETTINGS_COLLECTION,
   SETTINGS_RKEY,
 } from './records'
 
-const decorationEntitlementQueryRoot = 'decorationEntitlement'
-
-function useDecorationEntitlementQuery(did: string | undefined) {
-  const constellation = useConstellationInstance()
-  // Decoration checks run for every author in a feed, so keep them off the
-  // cold render and scroll path like the other fork-specific lookups.
-  const enabled = useDeferredEnable(DECORATIONS_ENABLED && !!did)
-  return useQuery({
-    queryKey: createQueryKey(decorationEntitlementQueryRoot, {
-      did,
-      constellation,
-      lists: DECORATION_LIST_URIS,
-    }),
-    enabled,
-    staleTime: STALE.MINUTES.THIRTY,
-    queryFn: () =>
-      hasDecorationEntitlement(did!, constellation, DECORATION_LIST_URIS),
-  })
-}
-
 const activeDecorationsQueryRoot = 'activeDecorations'
 
 /**
- * The settings record for `did`, but only while `did` is a member of a
- * configured list. Every slot hook below shares this query, so React Query
- * dedupes a DID to one resolution per staleTime no matter how many avatars and
- * names reference it.
+ * The settings record for `did`. Every slot hook below shares this query, so
+ * React Query dedupes a DID to one resolution per staleTime no matter how many
+ * avatars and names reference it.
  */
 function useActiveDecorations(did: string | undefined) {
   const slingshot = useSlingshotInstance()
-  const entitlement = useDecorationEntitlementQuery(did)
+  // Decoration checks run for every author in a feed, so keep them off the
+  // cold render and scroll path like the other fork-specific lookups.
+  const enabled = useDeferredEnable(!!did)
   const {data} = useQuery({
     queryKey: createQueryKey(activeDecorationsQueryRoot, {did, slingshot}),
-    enabled: !!did && entitlement.data === true,
+    enabled,
     staleTime: STALE.MINUTES.THIRTY,
     queryFn: () => getDecorationSettings(did!, slingshot),
   })
-  return entitlement.data === true ? data : undefined
+  return data
 }
 
 /** Active avatar frame for a DID, or undefined. */
@@ -117,8 +91,8 @@ async function readOwnSettings(client: Client, did: DidString) {
 }
 
 /**
- * The current account's own settings, ungated by list membership so the
- * settings screen can read and preview choices either way. Empty until loaded.
+ * The current account's own settings, read straight from the PDS so the
+ * settings screen can preview choices. Empty until loaded.
  */
 export function useMyDecorationSettingsQuery() {
   const client = usePdsClient()

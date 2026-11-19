@@ -8,33 +8,24 @@ app renders here unchanged.
 
 ## What gates rendering
 
-A DID gets decorations only when both halves exist:
-
-1. **List membership.** The DID is a member of an exact Bluesky list listed in
-   `config.ts`. Constellation's `getManyToMany` verifies both links of the
-   `app.bsky.graph.listitem` in one request: `subject` points at the profile DID
-   and `list` points at any configured list URI. `did` restricts the linking
-   record to the list owner, so a listitem someone else forged cannot grant
-   access.
-2. **Settings record.** One `social.mu.deco.settings/self` record in the
-   account's own PDS, holding every slot:
-   `{avatar?: frameId, avatarShape?: shape, name?: gradientId, nameOutline?: bool}`.
+A DID renders decorations when it has a `social.mu.deco.settings/self` record
+in its own PDS, holding every slot:
+`{avatar?: frameId, avatarShape?: shape, name?: gradientId, nameOutline?: bool}`.
 
 The record is read through Slingshot because the AppView only serves
-`getRecord` for `app.bsky.*` collections. It survives a lapsed membership
-dormant, so choices come back if access returns. Unknown ids are ignored, so a
-record written by a newer build can never render something this one lacks.
+`getRecord` for `app.bsky.*` collections. Unknown ids are ignored, so a record
+written by a newer build can never render something this one lacks.
 
-Override the accepted list with `EXPO_PUBLIC_DECO_LIST_URIS` (comma separated).
-Setting it to an empty string disables every decoration query.
+Any account can set decorations by writing that record; no list membership or
+allowlist is checked. Since the record is public and self-authored, decorations
+are purely cosmetic and must never carry trust.
 
 ## One query per DID
 
-`useDecorations.ts` resolves a DID once per 30 minutes: entitlement first, then
-the record, and the record query stays disabled without entitlement. The slot
-hooks (`useAvatarDecoration`, `useAvatarShape`, `useNameGradient`,
-`useNameStyle`) all read that one cache entry, so a feed of the same author does
-not fan out into extra requests.
+`useDecorations.ts` resolves a DID's record once per 30 minutes. The slot hooks
+(`useAvatarDecoration`, `useAvatarShape`, `useNameGradient`, `useNameStyle`) all
+read that one cache entry, so a feed of the same author does not fan out into
+extra requests.
 
 ## Rendering
 
@@ -60,6 +51,3 @@ draft state machine lives in `draft.ts` so the "untouched slots follow the saved
 record, touched slots win" rule is testable on its own. `buildDecorationRecord`
 in `records.ts` owns the read-modify-write merge: `putRecord` replaces the whole
 record, so untouched slots must be carried over and cleared slots omitted.
-
-Choosing decorations does not require list membership; they simply do not render
-without it.
