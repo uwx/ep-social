@@ -2,7 +2,12 @@ import * as Linking from 'expo-linking'
 import {openAuthSessionAsync} from 'expo-web-browser'
 import {type OAuthSession} from '@atproto/oauth-client-expo'
 
-import {getNativeOAuthClient, NATIVE_REDIRECT_URI} from './oauth-native-client'
+import {isNativeRedirectUrl} from './oauth-config'
+import {
+  getNativeOAuthClient,
+  NATIVE_REDIRECT_SCHEMES,
+  NATIVE_REDIRECT_URI,
+} from './oauth-native-client'
 import {getOAuthScope} from './oauth-scopes'
 
 type SignInOptions = {
@@ -11,8 +16,9 @@ type SignInOptions = {
   audiences?: {appview: string; chat: string}
 }
 
-// Android may deliver one or two slashes after the custom URI scheme.
-const OAUTH_CALLBACK_RE = /^app\.witchsky:\/\/?auth\/callback\b/
+// Android may deliver one or two slashes after the custom URI scheme, and
+// builds before the puppykitty move used a different scheme.
+const OAUTH_CALLBACK_SCHEMES = new Set(NATIVE_REDIRECT_SCHEMES)
 
 /**
  * Complete Android OAuth from the redirect deep link itself.
@@ -26,11 +32,7 @@ const OAUTH_CALLBACK_RE = /^app\.witchsky:\/\/?auth\/callback\b/
  */
 export async function signInNative(
   identifier: string,
-  {
-    signal,
-    scope = getOAuthScope(),
-    audiences,
-  }: SignInOptions = {},
+  {signal, scope = getOAuthScope(), audiences}: SignInOptions = {},
 ): Promise<OAuthSession> {
   const client = getNativeOAuthClient(audiences)
   let authorizationUrl: URL
@@ -65,7 +67,11 @@ export async function signInNative(
     const subscription = Linking.addEventListener(
       'url',
       ({url: callbackUrl}) => {
-        if (settled || !OAUTH_CALLBACK_RE.test(callbackUrl)) return
+        if (
+          settled ||
+          !isNativeRedirectUrl(callbackUrl, OAUTH_CALLBACK_SCHEMES)
+        )
+          return
         settled = true
         cleanup()
 

@@ -2,11 +2,19 @@ const fs = require('node:fs')
 const path = require('node:path')
 const {createOAuthMetadata} = require('../src/state/session/oauth-config.ts')
 
+/**
+ * Writes both metadata documents. Native metadata comes from its own origin:
+ * atproto requires the private-use redirect scheme to be the client_id
+ * hostname in reverse-domain order, so one host is tied to one scheme.
+ */
 function generateOAuthMetadata(outputDir, options = {}) {
   fs.mkdirSync(outputDir, {recursive: true})
   for (const native of [false, true]) {
     const metadata = createOAuthMetadata({
-      baseUrl: process.env.EXPO_PUBLIC_OAUTH_BASE_URL || 'https://witchsky.app',
+      baseUrl: native
+        ? process.env.EXPO_PUBLIC_OAUTH_NATIVE_BASE_URL ||
+          'https://app.puppykitty.racing'
+        : process.env.EXPO_PUBLIC_OAUTH_BASE_URL || 'https://witchsky.app',
       clientName: process.env.EXPO_PUBLIC_OAUTH_CLIENT_NAME || 'Purrsky',
       ...options,
       native,

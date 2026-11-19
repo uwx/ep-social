@@ -633,12 +633,34 @@ func (srv *Server) oauthClientMetadata(c echo.Context, native bool) error {
 	}
 	metadata["client_id"] = baseURL + "/" + filename
 	metadata["client_uri"] = baseURL
-	if !native {
+	if native {
+		// A hostname without a dot (localhost, an IP) has no reverse-domain
+		// scheme, so keep the generated value for local bskyweb runs.
+		if redirect, ok := reverseDomainScheme(c.Request().Host); ok {
+			metadata["redirect_uris"] = []string{redirect + ":/auth/callback"}
+		}
+	} else {
 		metadata["redirect_uris"] = []string{baseURL + "/auth/web/callback"}
 	}
 	c.Response().Header().Set("Cache-Control", "public, max-age=300")
 	c.Response().Header().Set("Access-Control-Allow-Origin", "*")
 	return c.JSON(http.StatusOK, metadata)
+}
+
+// reverseDomainScheme returns the private-use URI scheme atproto requires for
+// a client_id host: the hostname in reverse-domain order (RFC 8252).
+func reverseDomainScheme(host string) (string, bool) {
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	if !strings.Contains(host, ".") || net.ParseIP(host) != nil {
+		return "", false
+	}
+	labels := strings.Split(host, ".")
+	for i, j := 0, len(labels)-1; i < j; i, j = i+1, j-1 {
+		labels[i], labels[j] = labels[j], labels[i]
+	}
+	return strings.Join(labels, "."), true
 }
 
 var oauthAudiencePattern = regexp.MustCompile(`^did:(plc:[a-z2-7]{24}|web:[A-Za-z0-9._:%-]+)#[A-Za-z0-9._-]+$`)

@@ -1,7 +1,7 @@
 import {BrowserOAuthClient} from '@atproto/oauth-client-browser'
 
 import {createIdentityResolver} from './identity-resolver'
-import {createOAuthMetadata} from './oauth-config'
+import {createOAuthMetadata, DEFAULT_OAUTH_BASE_URL} from './oauth-config'
 import {getOAuthAudiences} from './oauth-scopes'
 
 const clients = new Map<string, BrowserOAuthClient>()
@@ -10,7 +10,7 @@ export function getWebOAuthClient(
   audiences: {appview: string; chat: string} = getOAuthAudiences(),
 ) {
   const metadata = createOAuthMetadata({
-    baseUrl: process.env.EXPO_PUBLIC_OAUTH_BASE_URL || 'https://witchsky.app',
+    baseUrl: process.env.EXPO_PUBLIC_OAUTH_BASE_URL || DEFAULT_OAUTH_BASE_URL,
     clientName: process.env.EXPO_PUBLIC_OAUTH_CLIENT_NAME || 'Purrsky',
     ...audiences,
   })

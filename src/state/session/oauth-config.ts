@@ -1,7 +1,51 @@
 /** Shared by clients, metadata generation, and the metadata HTTP handlers. */
 export const DEFAULT_APPVIEW_AUDIENCE = 'did:web:api.bsky.app#bsky_appview'
 export const DEFAULT_CHAT_AUDIENCE = 'did:web:api.bsky.chat#bsky_chat'
-export const NATIVE_REDIRECT_URI = 'app.witchsky:/auth/callback'
+
+/** Origin hosting the web client metadata (`EXPO_PUBLIC_OAUTH_BASE_URL`). */
+export const DEFAULT_OAUTH_BASE_URL = 'https://witchsky.app'
+/**
+ * Origin hosting the native client metadata. Native metadata has its own host
+ * because atproto requires the private-use redirect scheme to be the
+ * `client_id` hostname in reverse-domain order, which pins one host per scheme.
+ */
+export const DEFAULT_NATIVE_OAUTH_BASE_URL = 'https://app.puppykitty.racing'
+export const OAUTH_CALLBACK_PATH = '/auth/callback'
+/** Schemes shipped by earlier builds; they stay registered so old links open. */
+export const LEGACY_NATIVE_REDIRECT_SCHEMES = ['app.witchsky'] as const
+
+/**
+ * RFC 8252 private-use scheme for a client_id: the hostname in reverse-domain
+ * order. atproto's provider rejects native metadata whose redirect scheme is
+ * not exactly this (see `reverseDomain` in atproto's oauth-provider).
+ */
+export function nativeRedirectScheme(baseUrl: string) {
+  const {hostname} = new URL(baseUrl)
+  const scheme = hostname.split('.').reverse().join('.')
+  if (!scheme.includes('.')) {
+    throw new Error(
+      `Native OAuth requires a dotted client_id hostname, got "${hostname}"`,
+    )
+  }
+  return scheme as `${string}.${string}`
+}
+
+/** atproto also requires a single slash after the scheme (RFC 8252). */
+export function nativeRedirectUri(baseUrl: string) {
+  const uri: `${string}.${string}:/${string}` = `${nativeRedirectScheme(baseUrl)}:${OAUTH_CALLBACK_PATH}`
+  return uri
+}
+
+/**
+ * True when a deep link is the OAuth redirect. Accepts the current scheme plus
+ * schemes from earlier builds, and Android's one- or two-slash delivery.
+ */
+export function isNativeRedirectUrl(url: string, schemes: Iterable<string>) {
+  const allowed = new Set(schemes)
+  const match = /^([a-z0-9.+-]+):\/+([^?#]*)/i.exec(url)
+  if (!match || !allowed.has(match[1].toLowerCase())) return false
+  return `/${match[2]}` === OAUTH_CALLBACK_PATH
+}
 
 /** Keep the prod grant and client identity so stored sessions can refresh. */
 export const OAUTH_SCOPE =
@@ -112,7 +156,7 @@ export function createOAuthMetadata({
     client_name: clientName,
     client_uri: baseUrl,
     redirect_uris: [
-      native ? NATIVE_REDIRECT_URI : `${baseUrl}/auth/web/callback`,
+      native ? nativeRedirectUri(baseUrl) : `${baseUrl}/auth/web/callback`,
     ] as [string],
     scope: buildOAuthScope(appview, chat, ['handle', 'email']),
     token_endpoint_auth_method: 'none' as const,

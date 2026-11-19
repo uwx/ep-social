@@ -56,12 +56,33 @@ module.exports = function (_config) {
         ? './assets/app-icons/ios_icon_testflight.icon'
         : './assets/app-icons/ios_icon_default.icon'
 
+  /*
+   * atproto requires the native OAuth redirect scheme to be the client_id
+   * hostname in reverse-domain order, so it is derived from the same origin
+   * oauth-native-client.ts uses. Keep this in sync with oauth-config.ts.
+   */
+  const OAUTH_NATIVE_BASE_URL =
+    process.env.EXPO_PUBLIC_OAUTH_NATIVE_BASE_URL ||
+    'https://app.puppykitty.racing'
+  const OAUTH_NATIVE_SCHEME = new URL(OAUTH_NATIVE_BASE_URL).hostname
+    .split('.')
+    .reverse()
+    .join('.')
+
   return {
     expo: {
       version: VERSION,
       name: process.env.EXPO_PUBLIC_APP_NAME || 'Purrsky',
       slug: 'witchsky',
-      scheme: ['bluesky', 'witchsky', 'app.witchsky'],
+      // 'app.witchsky' is still registered so links from older builds open.
+      scheme: [
+        ...new Set([
+          'bluesky',
+          'witchsky',
+          'app.witchsky',
+          OAUTH_NATIVE_SCHEME,
+        ]),
+      ],
       // owner: 'blueskysocial',
       // owner: 'neema.brown',
       runtimeVersion: {

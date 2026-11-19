@@ -9,7 +9,8 @@ const mockRemove = jest.fn()
 let mockUrlListener: ((event: {url: string}) => void) | undefined
 
 jest.mock('../oauth-native-client', () => ({
-  NATIVE_REDIRECT_URI: 'app.witchsky:/auth/callback',
+  NATIVE_REDIRECT_URI: 'racing.puppykitty.app:/auth/callback',
+  NATIVE_REDIRECT_SCHEMES: ['racing.puppykitty.app', 'app.witchsky'],
   getNativeOAuthClient: () => ({
     authorize: (...args: unknown[]) => mockAuthorize(...args),
     callback: (...args: unknown[]) => mockCallback(...args),
@@ -50,7 +51,7 @@ describe('Android native OAuth', () => {
     const result = signInNative('alice.test')
     await Promise.resolve()
     mockUrlListener?.({
-      url: 'app.witchsky://auth/callback?code=code-value&state=state-value',
+      url: 'racing.puppykitty.app://auth/callback?code=code-value&state=state-value',
     })
     rejectBrowser(new TypeError('undefined is not a function'))
 
@@ -58,11 +59,11 @@ describe('Android native OAuth', () => {
     expect(mockAuthorize).toHaveBeenCalledWith('alice.test', {
       display: 'touch',
       scope: getOAuthScope(),
-      redirect_uri: 'app.witchsky:/auth/callback',
+      redirect_uri: 'racing.puppykitty.app:/auth/callback',
     })
     expect(mockCallback).toHaveBeenCalledWith(
       new URLSearchParams('code=code-value&state=state-value'),
-      {redirect_uri: 'app.witchsky:/auth/callback'},
+      {redirect_uri: 'racing.puppykitty.app:/auth/callback'},
     )
     expect(mockRemove).toHaveBeenCalledTimes(1)
   })

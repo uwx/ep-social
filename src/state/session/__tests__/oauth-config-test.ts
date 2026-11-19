@@ -4,6 +4,8 @@ import {
   DEFAULT_APPVIEW_AUDIENCE,
   hasOAuthAppViewScope,
   hasOAuthPermission,
+  isNativeRedirectUrl,
+  nativeRedirectUri,
 } from '../oauth-config'
 
 const prodScope =
@@ -27,6 +29,51 @@ it.each([false, true])(
     ])
   },
 )
+
+it('derives the native redirect scheme from the client_id host', () => {
+  const metadata = createOAuthMetadata({
+    baseUrl: 'https://app.puppykitty.racing',
+    native: true,
+  })
+  expect(metadata.client_id).toBe(
+    'https://app.puppykitty.racing/oauth-client-metadata-native.json',
+  )
+  expect(metadata.redirect_uris).toEqual([
+    'racing.puppykitty.app:/auth/callback',
+  ])
+  expect(nativeRedirectUri('https://app.puppykitty.racing')).toBe(
+    'racing.puppykitty.app:/auth/callback',
+  )
+  expect(() => nativeRedirectUri('http://localhost:8081')).toThrow()
+})
+
+it('matches current and legacy native redirect links', () => {
+  const schemes = ['racing.puppykitty.app', 'app.witchsky']
+  expect(
+    isNativeRedirectUrl(
+      'racing.puppykitty.app:/auth/callback?code=a&state=b',
+      schemes,
+    ),
+  ).toBe(true)
+  expect(
+    isNativeRedirectUrl(
+      'racing.puppykitty.app://auth/callback?code=a&state=b',
+      schemes,
+    ),
+  ).toBe(true)
+  expect(
+    isNativeRedirectUrl('app.witchsky://auth/callback?code=a', schemes),
+  ).toBe(true)
+  expect(isNativeRedirectUrl('racing.puppykitty.app:/other', schemes)).toBe(
+    false,
+  )
+  expect(isNativeRedirectUrl('https://app.puppykitty.racing/', schemes)).toBe(
+    false,
+  )
+  expect(isNativeRedirectUrl('racing.puppykitty.app:/auth/callback', [])).toBe(
+    false,
+  )
+})
 
 it('keeps the default grant stable and adds requested optional access', () => {
   const baseUrl = 'https://canary.witchsky.app'

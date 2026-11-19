@@ -19,11 +19,7 @@ type SignInOptions = {
  */
 export async function signInNative(
   identifier: string,
-  {
-    signal: _signal,
-    scope = getOAuthScope(),
-    audiences,
-  }: SignInOptions = {},
+  {signal: _signal, scope = getOAuthScope(), audiences}: SignInOptions = {},
 ): Promise<OAuthSession> {
   const client = getNativeOAuthClient(audiences)
   const authorizationUrl = await client.authorize(identifier, {

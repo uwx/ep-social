@@ -34,7 +34,10 @@ extra requests.
 - **Shape** - `circle`, `square`, `squircle`, or `hexagon`. A hexagon cannot be
   a rounded rect, so `HexagonAvatar` clips the image with an SVG `ClipPath` and
   draws the border, frame, and live ring on the same path. This needs no native
-  masked-view module, so it works on web and native alike.
+  masked-view module, so it works on web and native alike. The clip id is
+  unique per mounted instance: browsers resolve `url(#id)` to the first match in
+  document order, so a shared id can resolve into an inactive screen kept
+  mounted with `display: none`, which leaves the image unclipped.
 - **Gradient** - web paints a real `background-clip: text` gradient. Native
   cannot take a paint gradient, so `GradientNameText` colors each grapheme; font
   metrics are unchanged, so wrapping and `numberOfLines` truncation behave as

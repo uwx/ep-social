@@ -60,7 +60,7 @@ export const Logo = forwardRef(function LogoImpl(props: Props, ref) {
             ? require('../../../assets/kawaii.avif')
             : require('../../../assets/kawaii_smol.avif')
         }
-        accessibilityLabel="epstein.social"
+        accessibilityLabel="Purrsky"
         accessibilityHint=""
         accessibilityIgnoresInvertColors
         contentFit="contain"

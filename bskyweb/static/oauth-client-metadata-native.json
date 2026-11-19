@@ -1,9 +1,9 @@
 {
-  "client_id": "https://witchsky.app/oauth-client-metadata-native.json",
+  "client_id": "https://app.puppykitty.racing/oauth-client-metadata-native.json",
   "client_name": "Purrsky",
-  "client_uri": "https://witchsky.app",
+  "client_uri": "https://app.puppykitty.racing",
   "redirect_uris": [
-    "app.witchsky:/auth/callback"
+    "racing.puppykitty.app:/auth/callback"
   ],
   "scope": "atproto transition:generic transition:email transition:chat.bsky identity:handle",
   "token_endpoint_auth_method": "none",
