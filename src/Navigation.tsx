@@ -235,6 +235,10 @@ const ThemeScreen = deferredNamedScreen(
   () => require('#/screens/Theme'),
   'ThemeScreen',
 )
+const EmojiPackScreen = deferredNamedScreen(
+  () => require('#/screens/EmojiPack'),
+  'EmojiPackScreen',
+)
 const AppIconSettingsScreen = deferredNamedScreen(
   () => require('#/screens/Settings/AppIconSettings'),
   'AppIconSettingsScreen',
@@ -445,6 +449,11 @@ function commonScreens(Stack: typeof Flat, unreadCountLabel?: string) {
         name="Event"
         component={EventScreen}
         options={{title: title(msg`Event`)}}
+      />
+      <Stack.Screen
+        name="EmojiPack"
+        getComponent={() => EmojiPackScreen}
+        options={{title: title(msg`Emoji pack`)}}
       />
       <Stack.Screen
         name="Moderation"

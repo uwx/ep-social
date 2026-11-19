@@ -28,6 +28,8 @@ import {
 import {type ComposerImage} from '#/state/gallery'
 import {createComposerImage} from '#/state/gallery'
 import {type ChatInvitePreview} from '#/state/queries/join-links'
+import {fetchPack} from '#/features/bluemoji/packs/queries'
+import {getPackIconUrl, parsePackUrl} from '#/features/bluemoji/packs/util'
 import {type Gif} from '#/features/gifPicker/types'
 import {
   getColorSets,
@@ -220,6 +222,14 @@ export async function resolveLink(
       // resolution is temporarily unavailable.
     }
   }
+  const packRoute = parsePackUrl(resolvedUri)
+  if (packRoute) {
+    try {
+      return await resolvePackExternal(appviewClient, resolvedUri, packRoute)
+    } catch {
+      // Same fallback as themes: the page still has usable Open Graph data.
+    }
+  }
   return resolveExternal(resolvedUri)
 
   // Forked from useGetPost. TODO: move into RQ.
@@ -325,6 +335,45 @@ async function resolveThemeExternal(
     description,
     thumb: await imageToThumb(thumbnail.toString()),
     associatedRefs: [{uri: result.uri as AtUriString, cid: result.cid}],
+  }
+}
+
+/**
+ * Packs are PDS records with no AppView index, so the record is read from its
+ * owner. The `associatedRefs` entry is what lets our own clients render the
+ * card without re-reading the URL.
+ */
+async function resolvePackExternal(
+  appviewClient: Client,
+  uri: string,
+  route: {name: string; rkey: string},
+): Promise<ResolvedExternalLink> {
+  let did = route.name
+  if (!did.startsWith('did:')) {
+    const resolved = await appviewClient.call(
+      com.atproto.identity.resolveHandle,
+      {handle: did as HandleString},
+    )
+    did = resolved.did
+  }
+  const pack = await fetchPack(did, route.rkey)
+  if (!pack) throw new Error('Pack not found')
+  let author = route.name
+  try {
+    const profile = await appviewClient.call(app.bsky.actor.getProfile, {
+      actor: did as AtIdentifierString,
+    })
+    author = profile.handle
+  } catch {}
+  const icon = getPackIconUrl(pack)
+  return {
+    type: 'external',
+    uri,
+    title: pack.record.name,
+    description:
+      pack.record.description ?? `Emoji pack by @${author.replace(/^@/, '')}`,
+    thumb: icon ? await imageToThumb(icon) : undefined,
+    associatedRefs: [{uri: pack.uri as AtUriString, cid: pack.cid}],
   }
 }
 

@@ -59,6 +59,7 @@ import {VideoClip_Stroke1_Corner0_Rounded as VideoIcon} from '#/components/icons
 import * as Layout from '#/components/Layout'
 import {ScreenHider} from '#/components/moderation/ScreenHider'
 import {ProfileStarterPacks} from '#/components/StarterPack/ProfileStarterPacks'
+import {ProfilePacks} from '#/features/bluemoji/packs/ProfilePacks'
 import {ProfileEvents} from '#/features/events/components/ProfileEvents'
 import {accentForeground} from '#/features/themes/accentForeground'
 import {type app} from '#/lexicons'
@@ -272,6 +273,7 @@ function ProfileScreenLoaded({
   const feedsSectionRef = useRef<SectionRef>(null)
   const listsSectionRef = useRef<SectionRef>(null)
   const starterPacksSectionRef = useRef<SectionRef>(null)
+  const packsSectionRef = useRef<SectionRef>(null)
   const labelsSectionRef = useRef<SectionRef>(null)
 
   useSetTitle(combinedDisplayName({...profile, hideDisplayNames}))
@@ -297,6 +299,17 @@ function ProfileScreenLoaded({
   const showFeedsTab = isMe || feedGenCount > 0
   const starterPackCount = profile.associated?.starterPacks || 0
   const showStarterPacksTab = isMe || starterPackCount > 0
+  /*
+   * Packs are PDS records with no AppView index, so there is no cheap count to
+   * gate the tab on. It is always present for a signed-in viewer and reads the
+   * owner's repo only when opened.
+   */
+  const showPacksTab = hasSession
+  // Pack links need an identifier that resolves; a handle that does not is
+  // still shown in the UI but must not end up in a shared URL.
+  const packAuthorName = isInvalidHandle(profile.handle)
+    ? profile.did
+    : profile.handle
   // subtract starterpack count from list count, since starterpacks are a type of list
   const listCount = (profile.associated?.lists || 0) - starterPackCount
   const showListsTab = hasSession && (isMe || listCount > 0)
@@ -313,6 +326,7 @@ function ProfileScreenLoaded({
     showEventsTab ? _(msg`Events`) : undefined,
     showFeedsTab ? _(msg`Feeds`) : undefined,
     showStarterPacksTab ? _(msg`Starter Packs`) : undefined,
+    showPacksTab ? _(msg`Emoji Packs`) : undefined,
     showListsTab && !useLabelerTabOrder ? _(msg`Lists`) : undefined,
   ].filter(Boolean) as string[]
 
@@ -326,6 +340,7 @@ function ProfileScreenLoaded({
   let eventsIndex: number | null = null
   let feedsIndex: number | null = null
   let starterPacksIndex: number | null = null
+  let packsIndex: number | null = null
   let listsIndex: number | null = null
   if (showFiltersTab) {
     filtersIndex = nextIndex++
@@ -354,6 +369,9 @@ function ProfileScreenLoaded({
   if (showStarterPacksTab) {
     starterPacksIndex = nextIndex++
   }
+  if (showPacksTab) {
+    packsIndex = nextIndex++
+  }
   if (showListsTab) {
     listsIndex = nextIndex++
   }
@@ -378,6 +396,8 @@ function ProfileScreenLoaded({
         feedsSectionRef.current?.scrollToTop()
       } else if (index === starterPacksIndex) {
         starterPacksSectionRef.current?.scrollToTop()
+      } else if (index === packsIndex) {
+        packsSectionRef.current?.scrollToTop()
       } else if (index === listsIndex) {
         listsSectionRef.current?.scrollToTop()
       }
@@ -393,6 +413,7 @@ function ProfileScreenLoaded({
       feedsIndex,
       listsIndex,
       starterPacksIndex,
+      packsIndex,
     ],
   )
 
@@ -676,6 +697,19 @@ function ProfileScreenLoaded({
                     : undefined
                 }
                 emptyStateIcon={CircleAndSquareIcon}
+              />
+            )
+          : null}
+        {showPacksTab
+          ? ({headerHeight, isFocused, scrollElRef}) => (
+              <ProfilePacks
+                ref={packsSectionRef}
+                did={profile.did}
+                name={packAuthorName}
+                isMe={isMe}
+                scrollElRef={scrollElRef as ListRef}
+                headerOffset={headerHeight}
+                enabled={isFocused}
               />
             )
           : null}

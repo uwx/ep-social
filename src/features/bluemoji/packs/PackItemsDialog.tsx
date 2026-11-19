@@ -85,6 +85,9 @@ export function PackItemsDialog({
                 pack,
                 add: [...added.values()],
                 remove: memberships.filter(item => removed.has(item.subject)),
+                existing: memberships
+                  .filter(item => !removed.has(item.subject))
+                  .map(item => item.subject),
               },
               {onSuccess: onDone},
             )

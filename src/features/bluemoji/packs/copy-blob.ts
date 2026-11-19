@@ -1,4 +1,5 @@
 import {
+  cacheDirectory,
   downloadAsync,
   getInfoAsync,
 } from 'expo-file-system/legacy'

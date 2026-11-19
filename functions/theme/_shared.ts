@@ -1,3 +1,9 @@
+import {
+  getRecord,
+  resolveIdentifier,
+  resolvePds,
+} from '../_shared/atproto.ts'
+
 export type ThemeRecord = {
   name: string
   description?: string
@@ -8,46 +14,15 @@ export type ThemeRecord = {
   special?: {$type: string; accent?: string}
 }
 
-function didWebUrl(did: string) {
-  const parts = did.slice('did:web:'.length).split(':').map(decodeURIComponent)
-  const host = parts.shift()
-  return parts.length
-    ? `https://${host}/${parts.join('/')}/did.json`
-    : `https://${host}/.well-known/did.json`
-}
-
 export async function resolveTheme(name: string, rkey: string) {
-  let did = name
-  let author = name
-  if (!name.startsWith('did:')) {
-    const profile = await fetch(
-      `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(name)}`,
-    )
-    if (!profile.ok) throw new Error('Author not found')
-    const value = (await profile.json()) as {did: string; handle?: string}
-    did = value.did
-    author = value.handle ?? name
+  const {did, handle} = await resolveIdentifier(name)
+  const pds = await resolvePds(did)
+  const result = await getRecord(pds, did, 'app.witchsky.theme.colors', rkey)
+  return {
+    ...(result as {uri: string; cid: string; value: ThemeRecord}),
+    author: handle ?? name,
+    did,
   }
-  const didDocumentUrl = did.startsWith('did:web:')
-    ? didWebUrl(did)
-    : `https://plc.directory/${encodeURIComponent(did)}`
-  const didDocument = (await (await fetch(didDocumentUrl)).json()) as {
-    service?: {id: string; type: string; serviceEndpoint: string}[]
-  }
-  const pds = didDocument.service?.find(service =>
-    service.id.endsWith('#atproto_pds'),
-  )?.serviceEndpoint
-  if (!pds) throw new Error('PDS not found')
-  const response = await fetch(
-    `${pds}/xrpc/com.atproto.repo.getRecord?repo=${encodeURIComponent(did)}&collection=app.witchsky.theme.colors&rkey=${encodeURIComponent(rkey)}`,
-  )
-  if (!response.ok) throw new Error('Theme not found')
-  const result = (await response.json()) as {
-    uri: string
-    cid: string
-    value: ThemeRecord
-  }
-  return {...result, author, did}
 }
 
 export function themeColorSets(record: ThemeRecord) {
@@ -60,16 +35,4 @@ export function themeColorSets(record: ThemeRecord) {
   ]
 }
 
-export function escapeHtml(value: string) {
-  return value.replace(
-    /[&<>"']/g,
-    character =>
-      ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;',
-      })[character]!,
-  )
-}
+export {escapeHtml} from '../_shared/escape'

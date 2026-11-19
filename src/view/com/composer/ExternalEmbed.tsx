@@ -22,6 +22,8 @@ import {ThemeEmbed} from '#/components/Post/Embed/ThemeEmbed'
 import {isThemeEmbed} from '#/components/Post/Embed/ThemeEmbed/utils'
 import {Embed as StarterPackEmbed} from '#/components/StarterPack/StarterPackCard'
 import {Text} from '#/components/Typography'
+import {PackEmbed} from '#/features/bluemoji/packs/PackEmbed'
+import {isEmojiPackEmbed} from '#/features/bluemoji/packs/util'
 import {type Gif} from '#/features/gifPicker/types'
 
 export const ExternalEmbedGif = ({
@@ -108,6 +110,9 @@ export const ExternalEmbedLink = ({
         }
         if (isThemeEmbed(externalView)) {
           return <ThemeEmbed view={externalView} />
+        }
+        if (isEmojiPackEmbed(externalView)) {
+          return <PackEmbed view={externalView} />
         }
         const atProvider = getAtCardProvider(uri)
         if (

@@ -53,6 +53,8 @@ import {RichText} from '#/components/RichText'
 import {Embed as StarterPackCard} from '#/components/StarterPack/StarterPackCard'
 import {SubtleHover} from '#/components/SubtleHover'
 import {IS_ANDROID, IS_WEB} from '#/env'
+import {PackEmbed} from '#/features/bluemoji/packs/PackEmbed'
+import {isEmojiPackEmbed} from '#/features/bluemoji/packs/util'
 import {EventEmbed} from '#/features/events/components/EventEmbed'
 import {parseEventUrl} from '#/features/events/url'
 import {TokimekiPollEmbed} from '#/features/tokimeki/components/TokimekiPollEmbed'
@@ -199,6 +201,15 @@ function MediaEmbed({
             modui={rest.moderation?.ui('contentMedia')}
             activeStyle={[a.mt_sm]}>
             <ThemeEmbed view={embed.view.external} onOpen={rest.onOpen} />
+          </ContentHider>
+        )
+      }
+      if (isEmojiPackEmbed(embed.view.external)) {
+        return (
+          <ContentHider
+            modui={rest.moderation?.ui('contentMedia')}
+            activeStyle={[a.mt_sm]}>
+            <PackEmbed view={embed.view.external} onOpen={rest.onOpen} />
           </ContentHider>
         )
       }

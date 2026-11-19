@@ -1,7 +1,9 @@
 import {
   getLicenseUrl,
-  getReactionEmojiImage,
   getSafeSourceUrl,
+} from '#/features/bluemoji/provenance'
+import {
+  getReactionEmojiImage,
   toReactionEmoji,
 } from '#/features/bluemoji/reactions/util'
 

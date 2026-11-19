@@ -9,7 +9,7 @@ import {Text} from '#/components/Typography'
 import {
   getLicenseUrl,
   getSafeSourceUrl,
-} from '#/features/bluemoji/reactions/util'
+} from '#/features/bluemoji/provenance'
 import {type BluemojiItem} from '#/features/bluemoji/util'
 
 /**

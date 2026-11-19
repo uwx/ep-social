@@ -20,6 +20,7 @@ import {
   useSaveEmojiMutation,
 } from '#/features/bluemoji/collection/mutations'
 import {useOwnCollectionQuery} from '#/features/bluemoji/collection/queries'
+import {PacksSection} from '#/features/bluemoji/packs/PacksSection'
 import {NewEmojiTile, Tile, TileGrid} from '#/features/bluemoji/Picker'
 import {type BluemojiItem} from '#/features/bluemoji/util'
 import {RunesScreenLayout} from './components/RunesScreenLayout'
@@ -91,6 +92,8 @@ export function CustomEmojiSettingsScreen() {
           </Button>
         </View>
       </View>
+
+      <PacksSection />
 
       <Dialog.Outer
         control={bulkControl}

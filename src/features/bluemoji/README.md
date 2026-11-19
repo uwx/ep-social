@@ -1,10 +1,11 @@
 # Bluemoji
 
 Witchsky displays inline `blue.moji.richtext.facet` emoji, provides a picker for
-the composing account's collection and public discovery, and supports
-`blue.moji.feed.reaction` reactions. Sticker attachments and packs are not
-supported. Selected emoji retain their source owner in drafts, including when
-two collections use the same alias.
+the composing account's collection and public discovery, supports
+`blue.moji.feed.reaction` reactions, and can create, share and copy
+`blue.moji.packs` packs. Sticker attachments are not supported. Selected emoji
+retain their source owner in drafts, including when two collections use the same
+alias.
 
 ## Trust boundary
 
@@ -52,6 +53,43 @@ reaction deletes, so `useInvalidateReactions` re-reads the truth instead. An
 earlier version subtracted one from every count-1 group missing from the
 viewer's list, which hid every other person's lone reaction from signed-in
 users while logged-out rendering looked fine.
+
+## Packs
+
+`src/features/bluemoji/packs/` implements the upstream
+`blue.moji.packs.pack`/`packitem` records (RFC 0002):
+
+- `queries.ts`: every read goes straight to the owner's PDS. Packs have no
+  AppView index we can rely on, so there is no count in `ProfileView` to gate a
+  tab on and no paginated endpoint to page; `listRecords` is capped at 1000
+  records so a pathological repo cannot stall a screen. Membership records carry
+  a `pack` AT-URI that is filtered client-side, then each `subject` is resolved
+  through the same verified `fetchBluemojiItem` path as inline emoji.
+- `mutations.ts`: create/edit/delete packs, set their members, and copy a pack
+  into the viewer's collection. Blobs cannot be referenced across repos, so a
+  copy downloads each rendition from the source PDS and uploads it again, scoped
+  by `copyOf`. Only emoji whose own `license` permits it are copied: an absent
+  licence, `LicenseRef-…`, and unknown identifiers all read as "no permission",
+  `OR` needs one usable operand, `AND` needs all of them. A copy whose alias is
+  already in the collection is skipped, comparing aliases through
+  `normalizeAlias` so another client's unnormalised `:name:` still dedupes, and
+  re-adding an existing subject is skipped too.
+- `PackEmbed.tsx`: renders a pack link as a card. The card reads the pack from
+  its owner's PDS, so the icon, name and description shown are the record's, not
+  the OG preview's. The route comes from `associatedRefs` when our composer wrote
+  it, and otherwise from the URL, the same fallback themes use because the
+  AppView strips unknown fields off `external`.
+- `PacksSection.tsx` on the Custom emoji screen is where packs are created;
+  `ProfilePacks.tsx` is the profile tab, with a footer link back to that screen
+  for the viewer's own profile. The tab exists for every signed-in viewer
+  because there is no count to gate it on, and it reads the repo only when
+  focused.
+
+`functions/profile/[name]/emoji-pack/[rkey].ts` supplies the Open Graph tags
+non-Witchsky clients see for a pack link. Provenance fields (`source`,
+`license`) are self-asserted: `src/features/bluemoji/provenance.ts` only links
+`http(s)` sources without credentials and canonical SPDX identifiers, and
+renders everything else as text.
 
 The web composer extends TipTap 2's Emoji node and renders verified aliases as
 inline images. Shortcode autocomplete uses the upstream shared Autocomplete/Sift

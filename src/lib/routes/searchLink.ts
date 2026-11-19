@@ -1,6 +1,7 @@
 import {isValidAtIdentifier, isValidRecordKey} from '@atproto/syntax'
 
 import {type CommonNavigatorParams} from '#/lib/routes/types'
+import {PACK_COLLECTION} from '#/features/bluemoji/packs/collections'
 import {THEME_COLLECTION} from '#/features/themes/types'
 
 type SearchLinkScreen =
@@ -11,6 +12,7 @@ type SearchLinkScreen =
   | 'StarterPack'
   | 'StarterPackShort'
   | 'Theme'
+  | 'EmojiPack'
 
 type SearchLink = {
   [Screen in SearchLinkScreen]: {
@@ -55,6 +57,8 @@ export function parseSearchLink(input: string): SearchLink | undefined {
       switch (kind) {
         case 'theme':
           return {screen: 'Theme', params: {name, rkey}}
+        case 'emoji-pack':
+          return {screen: 'EmojiPack', params: {name, rkey}}
         case 'post':
           return {screen: 'PostThread', params: {name, rkey}}
         case 'feed':
@@ -98,5 +102,7 @@ function parseAtUri(uri: string): SearchLink | undefined {
       return {screen: 'ProfileList', params: {name, rkey}}
     case 'app.bsky.graph.starterpack':
       return {screen: 'StarterPack', params: {name, rkey}}
+    case PACK_COLLECTION:
+      return {screen: 'EmojiPack', params: {name, rkey}}
   }
 }

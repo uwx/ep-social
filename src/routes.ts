@@ -18,6 +18,7 @@ export const router = new Router<AllNavigatableRoutes>({
   Settings: '/settings',
   Lists: '/lists',
   Event: '/profile/:name/event/:rkey',
+  EmojiPack: '/profile/:name/emoji-pack/:rkey',
   // moderation
   Moderation: '/moderation',
   ModerationInbox: '/moderation/inbox',

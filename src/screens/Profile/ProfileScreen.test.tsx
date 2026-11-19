@@ -25,6 +25,7 @@ jest.mock('#/view/com/util/error/ErrorScreen', () => ({}))
 jest.mock('#/view/com/util/fab/FAB', () => ({}))
 jest.mock('#/screens/Profile/Sections/Labels', () => ({}))
 jest.mock('#/components/StarterPack/ProfileStarterPacks', () => ({}))
+jest.mock('#/features/bluemoji/packs/ProfilePacks', () => ({}))
 jest.mock('#/features/themes/accentForeground', () => ({}))
 jest.mock('#/Navigation', () => ({}))
 jest.mock('#/state/cache/profile-shadow', () => ({

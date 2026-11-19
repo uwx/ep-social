@@ -3,6 +3,7 @@
   "include": [
     "/__embed/profile/*",
     "/profile/*/theme/*",
+    "/profile/*/emoji-pack/*",
     "/theme-og/*",
     "/game/*/*",
     "/video/*/*",

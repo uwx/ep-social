@@ -32,9 +32,9 @@ let fixed = 0
 for (const path of walk(OUT)) {
   const before = readFileSync(path, 'utf8')
   const after = before.replace(
-    /(from\s+")([^"]*)(")/g,
-    (_, open, spec, close) =>
-      open +
+    /(from\s+(["']))([^"']*)(\2)/g,
+    (_, head, _quote, spec, close) =>
+      head +
       spec
         .replaceAll('\\', '/')
         .replaceAll("''", '')
