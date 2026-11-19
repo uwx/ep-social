@@ -10,6 +10,7 @@ const domTests = [
   '<rootDir>/src/features/keyboardShortcuts/postNavigation.web.test.ts',
   '<rootDir>/src/features/keyboardShortcuts/overlayNavigation.web.test.ts',
   '<rootDir>/src/features/avatarDecorations/Typography.web.test.tsx',
+  '<rootDir>/src/features/avatarDecorations/HexagonAvatar.web.test.tsx',
 ]
 
 function preset(name) {
