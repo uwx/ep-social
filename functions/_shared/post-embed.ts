@@ -1,3 +1,4 @@
+import {getAppName} from './app-name.ts'
 import {renderCachedEmbed} from './embed-cache.ts'
 import {html, type ProfileView, renderHandleString} from './profile-embed.ts'
 import {getVideoBlobUrl} from './video-blob.ts'
@@ -333,10 +334,17 @@ class HeadHandler {
   thread: Thread
   url: string
   postTextString: string
-  constructor(thread: Thread, url: string, postTextString: string) {
+  appName: string
+  constructor(
+    thread: Thread,
+    url: string,
+    postTextString: string,
+    appName: string,
+  ) {
     this.thread = thread
     this.url = url
     this.postTextString = postTextString
+    this.appName = appName
   }
   async element(element) {
     const author = this.thread.post.author
@@ -353,7 +361,7 @@ class HeadHandler {
 
     element.append(
       html`
-        <meta property="og:site_name" content="Witchsky" />
+        <meta property="og:site_name" content="${this.appName}" />
         <meta property="og:type" content="article" />
         <meta property="profile:username" content="${author.handle}" />
         <meta property="og:url" content="${this.url}" />
@@ -417,6 +425,7 @@ export async function handlePostEmbed(context) {
     async render(publicUrl) {
       const origin = new URL(publicUrl).origin
       const base = env.ASSETS.fetch(new URL('/', origin))
+      const appName = await getAppName(env.ASSETS, origin)
 
       try {
         const apiUrl = new URL(
@@ -444,7 +453,10 @@ export async function handlePostEmbed(context) {
         const thread = data.thread
         const postTextString = expandPostTextRich(thread)
         return new HTMLRewriter()
-          .on(`head`, new HeadHandler(thread, publicUrl, postTextString))
+          .on(
+            `head`,
+            new HeadHandler(thread, publicUrl, postTextString, appName),
+          )
           .on(`title`, new TitleHandler(thread))
           .on(`noscript`, new NoscriptHandler(thread, postTextString))
           .transform(await base)

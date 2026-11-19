@@ -19,6 +19,7 @@ import {
   useUpdates,
 } from 'expo-updates'
 
+import {BRAND_CANVAS_DARK, BRAND_CANVAS_LIGHT} from '#/lib/constants'
 import {parseLinkingUrl} from '#/lib/parseLinkingUrl'
 import {isNetworkError} from '#/lib/strings/errors'
 import {logger} from '#/logger'
@@ -522,7 +523,8 @@ export const splash = (scheme: 'light' | 'dark') => {
     image: RNImage.resolveAssetSource(source)!.uri,
     imageFullScreen: true,
     imageResizeMode: 'cover',
-    backgroundColor: scheme === 'light' ? '#006AFF' : '#002861',
+    backgroundColor:
+      scheme === 'light' ? BRAND_CANVAS_LIGHT : BRAND_CANVAS_DARK,
     spinner: {
       enabled: true,
       color: '#ffffff',

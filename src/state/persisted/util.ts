@@ -1,5 +1,6 @@
 import {parse} from 'bcp-47'
 
+import {BRAND_SEED_COLOR} from '#/lib/constants'
 import {dedupArray} from '#/lib/functions'
 import {
   migrateCountsMetricsDisplay,
@@ -97,6 +98,18 @@ function migrateMetricsDisplayPrefs(data: Schema): Schema {
 
 export function normalizeData(data: Schema) {
   const next = hydrateWithDefaults(migrateMetricsDisplayPrefs(data))
+
+  if ((data.brandAccentDefaultsVersion ?? 0) < 1) {
+    /*
+     * Older builds defaulted the Material You accent to the upstream orange.
+     * Untouched installs should pick up the new brand seed; a user who picked
+     * the orange explicitly loses it once, and can pick it again.
+     */
+    if (next.material3Accent === '#ee6300') {
+      next.material3Accent = BRAND_SEED_COLOR
+    }
+    next.brandAccentDefaultsVersion = 1
+  }
 
   if ((data.goLinksDefaultsVersion ?? 0) < 1) {
     next.goLinksEnabled = false

@@ -129,7 +129,7 @@ func run(args []string) {
 					Name:     "app-name",
 					Usage:    "product name used in page titles and metadata",
 					Required: false,
-					Value:    "Witchsky",
+					Value:    "Purrsky",
 					EnvVars:  []string{"EXPO_PUBLIC_APP_NAME"},
 				},
 				&cli.BoolFlag{

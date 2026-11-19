@@ -20,7 +20,7 @@ import {compressImageSource} from '#/lib/media/image/compress'
 import {formatToFileExt, imageMimeToExtension} from '#/lib/media/image-formats'
 import {getDownloadImageUri} from '#/lib/media/original-image'
 import {logger} from '#/logger'
-import {IS_ANDROID, IS_IOS} from '#/env'
+import {APP_NAME, IS_ANDROID, IS_IOS} from '#/env'
 import {renderImage} from './image-manipulator'
 import {type PickerImage} from './picker.shared'
 import {type Dimensions} from './types'
@@ -111,7 +111,7 @@ export async function shareImageModal({uri}: {uri: string}) {
   }
 }
 
-const ALBUM_NAME = 'Witchsky'
+const ALBUM_NAME = APP_NAME
 
 /**
  * Saves original bytes from the image owner's PDS, or the CDN's `download`

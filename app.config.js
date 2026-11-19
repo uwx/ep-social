@@ -59,7 +59,7 @@ module.exports = function (_config) {
   return {
     expo: {
       version: VERSION,
-      name: process.env.EXPO_PUBLIC_APP_NAME || 'Witchsky',
+      name: process.env.EXPO_PUBLIC_APP_NAME || 'Purrsky',
       slug: 'witchsky',
       scheme: ['bluesky', 'witchsky', 'app.witchsky'],
       // owner: 'blueskysocial',
@@ -69,7 +69,7 @@ module.exports = function (_config) {
       },
       icon: './assets/app-icons/ios_icon_legacy_light.png',
       userInterfaceStyle: 'automatic',
-      primaryColor: '#ED5345',
+      primaryColor: '#6E5D0E',
       ios: {
         supportsTablet: true,
         bundleIdentifier: process.env.WITCHSKY_BUNDLE_ID || 'app.witchsky',
@@ -213,7 +213,7 @@ module.exports = function (_config) {
         adaptiveIcon: {
           foregroundImage: './assets/icon-android-foreground.png',
           monochromeImage: './assets/icon-android-monochrome.png',
-          backgroundColor: '#ED5345',
+          backgroundColor: '#F6E29A',
         },
         googleServicesFile: './google-services.json',
         package: process.env.WITCHSKY_BUNDLE_ID || 'app.witchsky',
@@ -405,7 +405,7 @@ module.exports = function (_config) {
           'expo-notifications',
           {
             icon: './assets/icon-android-notification.png',
-            color: '#ED5345',
+            color: '#6E5D0E',
             sounds: PLATFORM === 'ios' ? ['assets/dm.aiff'] : ['assets/dm.mp3'],
           },
         ],
@@ -503,22 +503,22 @@ module.exports = function (_config) {
           'expo-splash-screen',
           {
             ios: {
-              backgroundColor: '#fefbfb',
+              backgroundColor: '#f6f0e7',
               image: './assets/splash/witchsky.png',
               resizeMode: 'contain',
               dark: {
-                backgroundColor: '#281c1c',
-                image: './assets/splash/witchsky.png',
+                backgroundColor: '#1d1b16',
+                image: './assets/splash/witchsky-dark.png',
                 resizeMode: 'contain',
               },
             },
             android: {
-              backgroundColor: '#fefbfb',
+              backgroundColor: '#f6f0e7',
               image: './assets/splash/witchsky.png',
               imageWidth: 102, // even division of 306px
               dark: {
-                backgroundColor: '#281c1c',
-                image: './assets/splash/witchsky.png',
+                backgroundColor: '#1d1b16',
+                image: './assets/splash/witchsky-dark.png',
                 imageWidth: 102,
               },
             },

@@ -26,6 +26,7 @@ import {Globe_Stroke2_Corner0_Rounded as GlobeIcon} from '#/components/icons/Glo
 import {createStaticClick, InlineLinkText} from '#/components/Link'
 import {Loader} from '#/components/Loader'
 import {Text} from '#/components/Typography'
+import {APP_NAME} from '#/env'
 
 const inviteStatusPromise: Promise<Record<string, boolean>> = (async () => {
   const results: Record<string, boolean> = {}
@@ -165,7 +166,7 @@ export function Signup({
                       t.atoms.text_contrast_medium,
                     ]}>
                     <Trans>
-                      Witchsky is a Bluesky client. If you already have an
+                      {APP_NAME} is a Bluesky client. If you already have an
                       account,{' '}
                       <InlineLinkText
                         label={l`sign in`}

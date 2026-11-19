@@ -1,6 +1,6 @@
 {
   "client_id": "https://witchsky.app/oauth-client-metadata-native.json",
-  "client_name": "Witchsky",
+  "client_name": "Purrsky",
   "client_uri": "https://witchsky.app",
   "redirect_uris": [
     "app.witchsky:/auth/callback"

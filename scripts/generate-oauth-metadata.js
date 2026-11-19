@@ -7,7 +7,7 @@ function generateOAuthMetadata(outputDir, options = {}) {
   for (const native of [false, true]) {
     const metadata = createOAuthMetadata({
       baseUrl: process.env.EXPO_PUBLIC_OAUTH_BASE_URL || 'https://witchsky.app',
-      clientName: process.env.EXPO_PUBLIC_OAUTH_CLIENT_NAME || 'Witchsky',
+      clientName: process.env.EXPO_PUBLIC_OAUTH_CLIENT_NAME || 'Purrsky',
       ...options,
       native,
     })

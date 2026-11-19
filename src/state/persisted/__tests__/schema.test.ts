@@ -58,7 +58,7 @@ describe('persisted schema helpers', () => {
   it('applies schema defaults when reading partial data', () => {
     const parsed = tryParse(JSON.stringify(partialState))
 
-    expect(parsed?.material3Accent).toBe('#ee6300')
+    expect(parsed?.material3Accent).toBe('#f6e29a')
     expect(parsed?.material3Style).toBe('TONAL_SPOT')
   })
 
@@ -149,7 +149,7 @@ describe('persisted schema helpers', () => {
     expect(raw).toBeDefined()
 
     const reparsed = JSON.parse(raw!)
-    expect(reparsed.material3Accent).toBe('#ee6300')
+    expect(reparsed.material3Accent).toBe('#f6e29a')
     expect(reparsed.material3Style).toBe('TONAL_SPOT')
   })
 
@@ -220,6 +220,25 @@ describe('persisted schema helpers', () => {
       expect(normalized.fullsizeFormat).toBe(expectedFullsize)
     },
   )
+
+  it('moves an untouched orange accent to the brand seed', () => {
+    const parsed = tryParse(
+      JSON.stringify({...partialState, material3Accent: '#ee6300'}),
+    )
+    const normalized = normalizeData(parsed!)
+
+    expect(normalized.material3Accent).toBe('#f6e29a')
+    expect(normalized.brandAccentDefaultsVersion).toBe(1)
+  })
+
+  it('keeps a custom accent pick', () => {
+    const parsed = tryParse(
+      JSON.stringify({...partialState, material3Accent: '#7b2cbf'}),
+    )
+    const normalized = normalizeData(parsed!)
+
+    expect(normalized.material3Accent).toBe('#7b2cbf')
+  })
 
   it('preserves legacy high-quality PNG preferences', () => {
     const parsed = tryParse(

@@ -1,3 +1,4 @@
+import {getAppName} from '../../../_shared/app-name.ts'
 import {escapeHtml, resolveTheme, themeColorSets} from '../../../theme/_shared'
 
 type Env = {ASSETS?: Fetcher}
@@ -11,10 +12,12 @@ export const onRequestGet: PagesFunction<Env> = async context => {
     const subtitle = `${count} ${count === 1 ? 'variant' : 'variants'} · ${author}`
     const description = value.description ?? subtitle
     const url = new URL(context.request.url)
+    const appName = await getAppName(context.env.ASSETS, url.origin)
     const image = `${url.origin}/theme-og/${encodeURIComponent(name)}/${encodeURIComponent(rkey)}`
     const meta = `
-      <title>${escapeHtml(value.name)} — Witchsky Theme</title>
+      <title>${escapeHtml(value.name)} — ${escapeHtml(appName)} Theme</title>
       <meta name="description" content="${escapeHtml(description)}">
+      <meta property="og:site_name" content="${escapeHtml(appName)}">
       <meta property="og:type" content="website">
       <meta property="og:title" content="${escapeHtml(value.name)}">
       <meta property="og:description" content="${escapeHtml(description)}">

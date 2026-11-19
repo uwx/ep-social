@@ -17,6 +17,7 @@ import {Button, ButtonText} from '#/components/Button'
 import * as Dialog from '#/components/Dialog'
 import {Loader} from '#/components/Loader'
 import {Text} from '#/components/Typography'
+import {APP_NAME} from '#/env'
 
 /** Render inside an opened action dialog, never in a background query. */
 export function OAuthPermissionGate({
@@ -108,8 +109,8 @@ export function OAuthPermissionGate({
       </Text>
       <Text>
         {permission === 'handle'
-          ? l`Allow Witchsky to change your handle to continue.`
-          : l`Allow Witchsky to view and verify your email address to continue.`}
+          ? l`Allow ${APP_NAME} to change your handle to continue.`
+          : l`Allow ${APP_NAME} to view and verify your email address to continue.`}
       </Text>
       {error ? <Admonition type="error">{error}</Admonition> : null}
       {!granted && !error ? (

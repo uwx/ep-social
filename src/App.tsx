@@ -15,6 +15,7 @@ import {BottomSheetProvider} from '@bsky.app/bottom-sheet'
 import {BackgroundNotificationPreferencesProvider} from '@bsky.app/expo-background-notification-handler/src/BackgroundNotificationHandlerProvider'
 import {useLingui} from '@lingui/react/macro'
 
+import {BRAND_CANVAS_DARK, BRAND_CANVAS_LIGHT} from '#/lib/constants'
 import {Provider as HideBottomBarBorderProvider} from '#/lib/hooks/useHideBottomBarBorder'
 import {QueryProvider} from '#/lib/react-query'
 import {ThemeProvider} from '#/lib/ThemeContext'
@@ -96,7 +97,9 @@ void identifyDevice(getDeviceId(), setupDeviceId)
 void SplashScreen.preventAutoHideAsync()
 if (IS_IOS) {
   void SystemUI.setBackgroundColorAsync(
-    Appearance.getColorScheme() === 'dark' ? '#281c1c' : '#fefbfb',
+    Appearance.getColorScheme() === 'dark'
+      ? BRAND_CANVAS_DARK
+      : BRAND_CANVAS_LIGHT,
   )
 }
 if (IS_ANDROID) {

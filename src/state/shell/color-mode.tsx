@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react'
 
+import {BRAND_SEED_COLOR} from '#/lib/constants'
 import * as persisted from '#/state/persisted'
 
 type StateContext = {
@@ -33,7 +34,7 @@ const stateContext = createContext<StateContext>({
   darkTheme: 'dark',
   colorScheme: 'witchsky',
   hue: 0,
-  material3Accent: '#ee6300',
+  material3Accent: BRAND_SEED_COLOR,
   material3Style: 'TONAL_SPOT',
   activeTheme: undefined,
 })
@@ -49,7 +50,7 @@ export function Provider({children}: PropsWithChildren<{}>) {
   )
   const [hue, setHue] = useState(() => persisted.get('hue'))
   const [material3Accent, setMaterial3Accent] = useState(
-    () => persisted.get('material3Accent') ?? '#ee6300',
+    () => persisted.get('material3Accent') ?? BRAND_SEED_COLOR,
   )
   const [material3Style, setMaterial3Style] = useState(
     () => persisted.get('material3Style') ?? 'TONAL_SPOT',

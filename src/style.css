@@ -12,39 +12,39 @@
  * HTML & BODY STYLES IN `web/index.html` and `bskyweb/templates/base.html`
  */
 :root {
-  --text: #281c1c;
-  --background: #fefbfb;
-  --backgroundLight: #fefbfb;
+  --text: #221b00;
+  --background: #f6f0e7;
+  --backgroundLight: #f6f0e7;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
     --text: #fefbfb;
-    --background: #281c1c;
-    --backgroundLight: #2f201f;
+    --background: #1d1b16;
+    --backgroundLight: #282520;
   }
 }
 
 html.theme--light {
   color-scheme: light;
-  --text: #281c1c;
-  --background: #fefbfb;
-  --backgroundLight: #fefbfb;
-  background-color: #fefbfb;
+  --text: #221b00;
+  --background: #f6f0e7;
+  --backgroundLight: #f6f0e7;
+  background-color: #f6f0e7;
 }
 html.theme--dark {
   color-scheme: dark;
-  background-color: #281c1c;
+  background-color: #1d1b16;
   --text: #fefbfb;
-  --background: #281c1c;
-  --backgroundLight: #2f201f;
+  --background: #1d1b16;
+  --backgroundLight: #282520;
 }
 html.theme--dim {
   color-scheme: dark;
-  background-color: #281c1c;
+  background-color: #1d1b16;
   --text: #fefbfb;
-  --background: #281c1c;
-  --backgroundLight: #2f201f;
+  --background: #1d1b16;
+  --backgroundLight: #282520;
 }
 /* Buttons and inputs have a font set by UA, so we'll have to reset that */
 button,
@@ -119,11 +119,11 @@ img {
   pointer-events: none;
 }
 .ProseMirror .mention {
-  color: var(--mention-color, #ed5345);
+  color: var(--mention-color, #887526);
 }
 .ProseMirror a,
 .ProseMirror .autolink {
-  color: var(--mention-color, #ed5345);
+  color: var(--mention-color, #887526);
 }
 .ProseMirror .composer-syntax {
   opacity: 0.5;

@@ -2,7 +2,7 @@ import Svg, {Path} from 'react-native-svg'
 import {describe, expect, it, jest} from '@jest/globals'
 import {render} from '@testing-library/react-native'
 
-let mockAppName = 'Witchsky'
+let mockAppName = 'Purrsky'
 jest.mock('#/env', () => ({
   get APP_NAME() {
     return mockAppName
@@ -17,9 +17,9 @@ import {Logotype} from './Logotype'
 
 describe('Logotype', () => {
   it('draws the letterforms when the name is unchanged', () => {
-    mockAppName = 'Witchsky'
+    mockAppName = 'Purrsky'
     const {queryByText, UNSAFE_root} = render(<Logotype width={80} />)
-    expect(queryByText('Witchsky')).toBeNull()
+    expect(queryByText('Purrsky')).toBeNull()
     expect(UNSAFE_root.findAllByType(Path).length).toBeGreaterThan(1)
     expect(UNSAFE_root.findAllByType(Svg).length).toBe(1)
   })

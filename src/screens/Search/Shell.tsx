@@ -69,7 +69,7 @@ import * as Layout from '#/components/Layout'
 import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
 import {useAnalytics} from '#/analytics'
-import {IS_NATIVE, IS_WEB} from '#/env'
+import {APP_NAME, IS_NATIVE, IS_WEB} from '#/env'
 import {account, useStorage} from '#/storage'
 import type * as bsky from '#/types/bsky'
 import {AdvancedSearchDialog} from './components/AdvancedSearchDialog'
@@ -788,7 +788,7 @@ let SearchScreenInner = ({
             style={t.atoms.text_contrast_medium as StyleProp<ViewStyle>}
           />
           <Text style={[t.atoms.text_contrast_medium, a.text_md]}>
-            <Trans>Find posts, users, and feeds on Witchsky</Trans>
+            <Trans>Find posts, users, and feeds on {APP_NAME}</Trans>
           </Text>
         </View>
       </View>

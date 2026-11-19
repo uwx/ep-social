@@ -1,5 +1,6 @@
 import {type MaterialYouPalette} from '@assembless/react-native-material-you'
 
+import {BRAND_SEED_COLOR} from '#/lib/constants'
 import {
   generatePaletteFromColor,
   type GenerationStyle,
@@ -89,7 +90,7 @@ function overrides(base: SemanticColors, colors: SemanticColors) {
 
 export function materialYouRecord(
   mode: ThemeMode,
-  accent = '#6750a4',
+  accent = BRAND_SEED_COLOR,
 ): ThemeRecord {
   const sets = MATERIAL_YOU_STYLES.map(({name, label}) => ({
     name: label,

@@ -9,7 +9,7 @@ import * as Dialog from '#/components/Dialog'
 import {useNuxDialogContext} from '#/components/dialogs/nuxs'
 import {Sparkle_Stroke2_Corner0_Rounded as SparkleIcon} from '#/components/icons/Sparkle'
 import {Text} from '#/components/Typography'
-import {IS_E2E} from '#/env'
+import {APP_NAME, IS_E2E} from '#/env'
 
 export function enabled() {
   return !IS_E2E
@@ -40,7 +40,7 @@ export function WitchskyUpdateAnnouncement() {
       nativeOptions={{preventExpansion: true}}>
       <Dialog.Handle />
       <Dialog.ScrollableInner
-        label={l`What’s new in Witchsky`}
+        label={l`What’s new in ${APP_NAME}`}
         style={[web({maxWidth: 440})]}>
         <View
           testID="witchskyUpdateAnnouncement"
@@ -50,12 +50,12 @@ export function WitchskyUpdateAnnouncement() {
           </View>
           <View style={[a.gap_md]}>
             <Text style={[a.text_3xl, a.font_bold, a.text_center]}>
-              <Trans>What’s new in Witchsky</Trans>
+              <Trans>What’s new in {APP_NAME}</Trans>
             </Text>
             <Text style={[a.text_md, a.leading_snug, a.text_center]}>
               <Trans>
                 Explore new themes, keyboard shortcuts, video controls, and
-                buttons in the latest Witchsky update!
+                buttons in the latest {APP_NAME} update!
               </Trans>
             </Text>
           </View>

@@ -21,6 +21,14 @@ async function buildPwa() {
     manifest.name = appName
     manifest.short_name = appName
   }
+  /*
+   * Pages Functions render Open Graph metadata and cannot read the build-time
+   * `EXPO_PUBLIC_*` values, so publish the name they need as an asset.
+   */
+  await fs.writeFile(
+    path.join(output, 'app-name.json'),
+    JSON.stringify({name: manifest.name}) + '\n',
+  )
   await fs.writeFile(
     path.join(pwa, 'manifest.webmanifest'),
     JSON.stringify(manifest, null, 2) + '\n',

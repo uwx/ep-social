@@ -14,6 +14,7 @@ import * as env from '#/env'
 jest.mock('#/logger', () => ({logger: {error: jest.fn()}}))
 jest.mock('#/env', () => ({
   __esModule: true,
+  APP_NAME: 'Purrsky',
   IS_ANDROID: false,
   IS_IOS: true,
   IS_NATIVE: true,
@@ -56,7 +57,7 @@ it.each(['content-type', 'Content-Type', 'CONTENT-TYPE'])(
     })
 
     expect(createAlbumAsync).toHaveBeenCalledWith(
-      'Witchsky',
+      'Purrsky',
       undefined,
       undefined,
       expect.stringMatching(/\/witchsky-alice\.example-3abc-1\.avif$/),
@@ -119,7 +120,7 @@ it('uses distinct staging folders for repeated filenames and cleans up failed sa
   expect(copyAsync).toHaveBeenCalledTimes(2)
 })
 
-it('saves Android videos directly to the Witchsky album', async () => {
+it('saves Android videos directly to the app album', async () => {
   jest.replaceProperty(env, 'IS_ANDROID', true)
   jest.mocked(createDownloadResumable).mockReturnValue({
     downloadAsync: () =>
@@ -135,7 +136,7 @@ it('saves Android videos directly to the Witchsky album', async () => {
   })
 
   expect(createAlbumAsync).toHaveBeenCalledWith(
-    'Witchsky',
+    'Purrsky',
     undefined,
     undefined,
     expect.stringMatching(/\/witchsky-alice\.example-3abc\.mp4$/),

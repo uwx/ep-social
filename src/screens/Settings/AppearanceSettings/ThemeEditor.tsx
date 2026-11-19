@@ -19,7 +19,7 @@ import {Trash_Stroke2_Corner0_Rounded as TrashIcon} from '#/components/icons/Tra
 import * as Layout from '#/components/Layout'
 import * as Prompt from '#/components/Prompt'
 import {Text} from '#/components/Typography'
-import {IS_WEB} from '#/env'
+import {APP_NAME, IS_WEB} from '#/env'
 import {
   useDeleteTheme,
   usePublishTheme,
@@ -555,7 +555,7 @@ export function ThemeEditorScreen({route, navigation}: Props) {
             <Text style={[a.text_sm, t.atoms.text_contrast_medium]}>
               <Trans>
                 Optional. After publishing a theme for the opposite appearance
-                mode, paste its Witchsky link or AT URI here so people can use
+                mode, paste its {APP_NAME} link or AT URI here so people can use
                 the two together.
               </Trans>
             </Text>

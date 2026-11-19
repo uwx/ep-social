@@ -1,3 +1,4 @@
+import {getAppName} from './app-name.ts'
 import {renderCachedEmbed} from './embed-cache.ts'
 
 export type ProfileView = {
@@ -67,9 +68,11 @@ export const renderHandleString = (profile: ProfileView) =>
 class HeadHandler {
   profile: ProfileView
   url: string
-  constructor(profile: ProfileView, url: string) {
+  appName: string
+  constructor(profile: ProfileView, url: string, appName: string) {
     this.profile = profile
     this.url = url
+    this.appName = appName
   }
   async element(element) {
     const view = this.profile
@@ -90,7 +93,7 @@ class HeadHandler {
         : ''
     element.append(
       html`
-        <meta property="og:site_name" content="Witchsky" />
+        <meta property="og:site_name" content="${this.appName}" />
         <meta property="og:type" content="profile" />
         <meta property="profile:username" content="${view.handle}" />
         <meta property="og:url" content="${this.url}" />
@@ -164,8 +167,9 @@ export async function handleProfileEmbed(context) {
         }
 
         const profile = (await apiResponse.json()) as ProfileView
+        const appName = await getAppName(env.ASSETS, origin)
         return new HTMLRewriter()
-          .on(`head`, new HeadHandler(profile, publicUrl))
+          .on(`head`, new HeadHandler(profile, publicUrl, appName))
           .on(`title`, new TitleHandler(profile))
           .on(`noscript`, new NoscriptHandler(profile))
           .transform(await base)

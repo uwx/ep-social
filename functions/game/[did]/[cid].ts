@@ -7,6 +7,8 @@
  * what the AppView's unfurl already cached from this response.
  */
 
+import {getAppName} from '../../_shared/app-name.ts'
+
 type Env = {ASSETS?: {fetch: (req: Request) => Promise<Response>}}
 
 const escapeHtml = (value: string) =>
@@ -24,14 +26,18 @@ export const onRequestGet: PagesFunction<Env> = async context => {
    * Both segments are opaque identifiers we pass back out into the player URL,
    * so reject anything that isn't shaped like one before reflecting it.
    */
-  if (!/^did:[a-z]+:[a-zA-Z0-9._:%-]+$/.test(did) || !/^[a-zA-Z0-9]+$/.test(cid)) {
+  if (
+    !/^did:[a-z]+:[a-zA-Z0-9._:%-]+$/.test(did) ||
+    !/^[a-zA-Z0-9]+$/.test(cid)
+  ) {
     return new Response('Not found', {status: 404})
   }
 
   const player = new URL('/static/iframe/game.html', context.request.url)
   player.searchParams.set('game', context.request.url)
 
-  const title = 'Game on Witchsky'
+  const origin = new URL(context.request.url).origin
+  const title = `Game on ${await getAppName(context.env.ASSETS, origin)}`
   const description =
     'Play this Flash game, Java applet, visual novel or TIC-80 cart in your browser.'
 

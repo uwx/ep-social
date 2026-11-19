@@ -1,12 +1,12 @@
 {
   "id": "/",
-  "name": "Witchsky",
-  "short_name": "Witchsky",
+  "name": "Purrsky",
+  "short_name": "Purrsky",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#281c1c",
-  "background_color": "#281c1c",
+  "theme_color": "#f6f0e7",
+  "background_color": "#f6f0e7",
   "icons": [
     {"src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
     {"src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},

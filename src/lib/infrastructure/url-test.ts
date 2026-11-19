@@ -1,4 +1,5 @@
 import {loadTestImage} from '#/lib/infrastructure/load-test-image'
+import {APP_NAME} from '#/env'
 
 const INFRASTRUCTURE_URL_TEST_TIMEOUT_MS = 15_000
 
@@ -14,7 +15,7 @@ const IMAGE_CDN_TEST_PATH =
 
 const headers = new Headers({
   Accept: 'application/json',
-  'User-Agent': 'Witchsky (witchsky.app)',
+  'User-Agent': `${APP_NAME} (witchsky.app)`,
 })
 
 async function withFetchTimeout<T>(

@@ -3,7 +3,7 @@ import {isDidString} from '@atproto/lex'
 import {PlatformInfo} from '@bsky.app/expo-bluesky-swiss-army'
 import {z} from 'zod'
 
-import {DEFAULT_ALT_TEXT_AI_MODEL} from '#/lib/constants'
+import {BRAND_SEED_COLOR, DEFAULT_ALT_TEXT_AI_MODEL} from '#/lib/constants'
 import {
   countsMetricsDisplaySchema,
   followedByMetricsDisplaySchema,
@@ -150,7 +150,9 @@ const schema = z.object({
       message:
         'Invalid color format. Must be a 7-character hex code (e.g., #RRGGBB).',
     })
-    .default('#ee6300'),
+    .default(BRAND_SEED_COLOR),
+  /** Tracks the one-time migration to the pastel-yellow brand accent. */
+  brandAccentDefaultsVersion: z.number().optional(),
   material3Style: z
     .enum([
       'SPRITZ',
@@ -444,7 +446,8 @@ export const defaults: Schema = {
   darkTheme: 'dim',
   colorScheme: 'witchsky',
   hue: 0,
-  material3Accent: '#ee6300',
+  material3Accent: BRAND_SEED_COLOR,
+  brandAccentDefaultsVersion: 1,
   material3Style: 'TONAL_SPOT',
   activeTheme: undefined,
   session: {

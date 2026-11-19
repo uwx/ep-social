@@ -1,3 +1,5 @@
+import {APP_NAME} from '#/env'
+
 export type ConstellationLink = {
   did: `did:${string}:${string}`
   collection: string
@@ -28,7 +30,7 @@ type Collection =
 
 const headers = new Headers({
   Accept: 'application/json',
-  'User-Agent': 'Witchsky (witchsky.app)',
+  'User-Agent': `${APP_NAME} (witchsky.app)`,
 })
 
 const makeReqUrl = (

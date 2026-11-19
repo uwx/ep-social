@@ -11,6 +11,7 @@ import {atoms as a, useBreakpoints, useTheme, web} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
 import * as Dialog from '#/components/Dialog'
 import {Text} from '#/components/Typography'
+import {APP_NAME} from '#/env'
 import {useGlobalDialogsControlContext} from './Context'
 
 export function LinkWarningDialog() {
@@ -80,7 +81,7 @@ function LinkWarningDialogInner({
       label={
         potentiallyMisleading
           ? _(msg`Potentially misleading link warning`)
-          : _(msg`Leaving Witchsky`)
+          : _(msg`Leaving ${APP_NAME}`)
       }>
       <View style={[a.gap_2xl]}>
         <View style={[a.gap_sm]}>
@@ -88,7 +89,7 @@ function LinkWarningDialogInner({
             {potentiallyMisleading ? (
               <Trans>Potentially misleading link</Trans>
             ) : (
-              <Trans>Leaving Witchsky</Trans>
+              <Trans>Leaving {APP_NAME}</Trans>
             )}
           </Text>
           <Text style={[t.atoms.text_contrast_high, a.text_md, a.leading_snug]}>

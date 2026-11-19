@@ -10,7 +10,7 @@ Metro builder. Expo serves `public` directly in development and copies it into
 `dist` for production. Cloudflare Pages uses `dist`.
 The manifest and development icons live in `public/pwa`; production regenerates
 the icons from the logo, preserving transparency. The install splash uses
-Witchsky’s dark background.
+the brand's dark background.
 
 Only build assets and a copy of the app shell are precached. Online navigation
 always reaches the server; failed navigation falls back to the shell. API
@@ -27,8 +27,8 @@ Cloudflare Pages and the Go server are configured here.
 ## Browser verification
 
 1. Serve a production build on localhost or HTTPS and open it online.
-2. In browser developer tools, check Application > Manifest for the Witchsky
-   name, icons, standalone display, and root scope. Install the app and launch it.
+2. In browser developer tools, check Application > Manifest for the app name,
+   icons, standalone display, and root scope. Install the app and launch it.
 3. Wait for the service worker to activate, then go offline and reload a feed or
    profile URL. The shell should load; uncached network content may be unavailable.
 4. Go online, deploy a new build, and reload. The new worker should wait while

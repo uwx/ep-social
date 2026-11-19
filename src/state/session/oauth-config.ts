@@ -80,7 +80,7 @@ export function buildOAuthScope(
 
 export function createOAuthMetadata({
   baseUrl,
-  clientName = 'Witchsky',
+  clientName = 'Purrsky',
   native = false,
   appview = DEFAULT_APPVIEW_AUDIENCE,
   chat = DEFAULT_CHAT_AUDIENCE,

@@ -25,8 +25,8 @@ describe('Witchsky theme records', () => {
       ]),
     )
     expect(WITCHSKY_ACTIVE_THEME.dark.record.variants?.[0].colors).toEqual({
-      canvas: '#150b08',
-      surface: '#2a1a15',
+      canvas: '#12110d',
+      surface: '#1d1b16',
       positive: '#09b35e',
       critical: '#e91646',
     })
@@ -35,17 +35,17 @@ describe('Witchsky theme records', () => {
   it('maps semantic roles into an ALF scheme without changing canvas or accent', () => {
     const scheme = activeThemeToScheme(WITCHSKY_ACTIVE_THEME)
 
-    expect(scheme?.light.atoms.bg.backgroundColor).toBe('#fefbfb')
-    expect(scheme?.light.palette.contrast_200).toBe('#d0cbc9')
-    expect(scheme?.light.palette.contrast_700).toBe('#755f57')
-    expect(scheme?.light.palette.primary_500).toBe('#ed5345')
-    expect(scheme?.dark.atoms.bg.backgroundColor).toBe('#281c1c')
-    expect(scheme?.dark.palette.contrast_50).toBe('#3e2b21')
-    expect(scheme?.dark.palette.contrast_100).toBe('#624c43')
-    expect(scheme?.dark.palette.contrast_200).toBe('#624c43')
-    expect(scheme?.dark.palette.contrast_400).toBe('#887872')
-    expect(scheme?.dark.palette.contrast_700).toBe('#c0bbb9')
-    expect(scheme?.dark.palette.primary_500).toBe('#ed5345')
+    expect(scheme?.light.atoms.bg.backgroundColor).toBe('#f6f0e7')
+    expect(scheme?.light.palette.contrast_200).toBe('#cbc6bd')
+    expect(scheme?.light.palette.contrast_700).toBe('#615e57')
+    expect(scheme?.light.palette.primary_500).toBe('#6e5d0e')
+    expect(scheme?.dark.atoms.bg.backgroundColor).toBe('#1d1b16')
+    expect(scheme?.dark.palette.contrast_50).toBe('#33302a')
+    expect(scheme?.dark.palette.contrast_100).toBe('#494640')
+    expect(scheme?.dark.palette.contrast_200).toBe('#494640')
+    expect(scheme?.dark.palette.contrast_400).toBe('#726e67')
+    expect(scheme?.dark.palette.contrast_700).toBe('#afaba2')
+    expect(scheme?.dark.palette.primary_500).toBe('#dcc66e')
     expect(scheme?.dark.palette.white).toBe('#ffffff')
     expect(scheme?.dark.palette.black).toBe('#000000')
   })
@@ -102,7 +102,7 @@ describe('Witchsky theme records', () => {
       },
     })
 
-    expect(scheme?.light.palette.primary_500).not.toBe('#ed5345')
-    expect(scheme?.dark.palette.primary_500).toBe('#ed5345')
+    expect(scheme?.light.palette.primary_500).not.toBe('#6e5d0e')
+    expect(scheme?.dark.palette.primary_500).toBe('#dcc66e')
   })
 })

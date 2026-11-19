@@ -6,6 +6,20 @@ import {BLUESKY_PROXY_DID, CHAT_PROXY_DID, IS_DEV, MOD_PROXY_DID} from '#/env'
 import {ENV_APPVIEW_DID_PROXY, ENV_PUBLIC_BSKY_SERVICE} from '#/env'
 import {type app} from '#/lexicons'
 
+/**
+ * The pastel-yellow seed the default Material You theme is generated from.
+ * Surfaces that cannot generate a palette (icons, splash art, `theme-color`)
+ * use it directly.
+ */
+export const BRAND_SEED_COLOR = '#f6e29a'
+
+/**
+ * The selected Brand theme's canvas colors, used where a theme object is not
+ * available yet: native splash screens, `theme-color`, and the update screen.
+ */
+export const BRAND_CANVAS_LIGHT = '#f6f0e7'
+export const BRAND_CANVAS_DARK = '#1d1b16'
+
 export const LOCAL_DEV_SERVICE =
   Platform.OS === 'android' ? 'http://10.0.2.2:2583' : 'http://localhost:2583'
 export const STAGING_SERVICE = 'https://staging.bsky.dev'

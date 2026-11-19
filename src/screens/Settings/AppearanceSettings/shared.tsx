@@ -26,6 +26,7 @@ import {
   Heart2_Stroke2_Corner0_Rounded as HeartIconOutline,
 } from '#/components/icons/Heart2'
 import {Text} from '#/components/Typography'
+import {APP_NAME} from '#/env'
 import {MATERIAL_YOU_STYLES} from '#/features/themes/materialYou'
 
 export type ColorSchemeName =
@@ -59,7 +60,7 @@ export function useColorSchemes() {
     () => [
       {
         name: 'witchsky',
-        label: _(msg`Witchsky`),
+        label: APP_NAME,
         primary: DEFAULT_PALETTE.primary_500,
       },
       {

@@ -903,7 +903,15 @@ export async function applyIconSet({check, outputRoot, result, sourceRoot}) {
   for (const [relative, contents] of result.tsOutputs) await compareOrWrite(outputRoot, relative, contents)
 
   const existing = await listFiles(outputRoot)
-  for (const relative of existing.filter(file => file.endsWith('.tsx') && !result.tsOutputs.has(file))) {
+  /*
+   * tsOutputs is keyed by module path, which is always POSIX. listFiles joins
+   * with path.sep, so on Windows every generated module looked stale and got
+   * deleted (and rewritten) on each run.
+   */
+  for (const file of existing) {
+    if (!file.endsWith('.tsx')) continue
+    const relative = file.split(path.sep).join('/')
+    if (result.tsOutputs.has(relative)) continue
     const target = path.join(outputRoot, relative)
     const contents = await fs.readFile(target, 'utf8')
     if (!contents.startsWith(GENERATED_HEADER)) continue

@@ -18,6 +18,7 @@ import * as Toggle from '#/components/forms/Toggle'
 import {ArrowRotateClockwise_Stroke2_Corner0_Rounded as CloudSyncIcon} from '#/components/icons/ArrowRotate'
 import {ColorPalette_Stroke2_Corner0_Rounded as ColorPaletteIcon} from '#/components/icons/ColorPalette'
 import {Text} from '#/components/Typography'
+import {APP_NAME} from '#/env'
 import {
   useSettingsSyncStatus,
   useSyncAllAccountsState,
@@ -117,10 +118,10 @@ export function RunesSettingsSyncSettingsScreen() {
         <Admonition type="info" style={[a.flex_1]}>
           <Trans>
             Settings are encoded and stored in a hidden draft post on your
-            account. This lets you sync your Witchsky preferences across devices
-            without any external service. Your session credentials are never
-            included. Enabling sync loads any existing cloud settings and merges
-            them with local changes.
+            account. This lets you sync your {APP_NAME} preferences across
+            devices without any external service. Your session credentials are
+            never included. Enabling sync loads any existing cloud settings and
+            merges them with local changes.
           </Trans>
         </Admonition>
       </SettingsList.Item>

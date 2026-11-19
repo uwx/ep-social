@@ -8,7 +8,7 @@
  *
  * Manifest format (one field per line):
  *   witchsky:storage:v1
- *   Do not change me! These are your Witchsky settings.
+ *   Do not change me! These are your brand settings.
  *   updatedAt=<ISO8601>
  *   codec=gzip+u15
  *   overflowSegments=<N>
@@ -22,6 +22,8 @@
 
 import {sha256} from '@noble/hashes/sha2.js'
 import {gzip, inflate} from 'pako'
+
+import {APP_NAME} from '#/env'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -80,7 +82,7 @@ function u15Decode(encoded: string): Uint8Array {
 // Public API
 // ---------------------------------------------------------------------------
 
-const MANIFEST_COMMENT = 'Do not change me! These are your Witchsky settings.'
+const MANIFEST_COMMENT = `Do not change me! These are your ${APP_NAME} settings.`
 
 /**
  * Encode an arbitrary value to an array of draft-post text segments.
