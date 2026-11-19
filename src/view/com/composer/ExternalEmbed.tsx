@@ -101,7 +101,8 @@ export const ExternalEmbedLink = ({
           description:
             data.view?.external?.description || data.description || '',
           // Prefer Open Graph data because it contains the generated theme card.
-          thumb: data.thumb?.source.path || data.view?.external?.thumb,
+          thumb: (data.thumb?.source.path || data.view?.external?.thumb) as
+            UriString | undefined,
           associatedRefs:
             data.view?.external?.associatedRefs || data.associatedRefs,
         }
