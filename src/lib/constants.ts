@@ -28,7 +28,7 @@ export const BSKY_SERVICE_DID = 'did:web:bsky.social'
 export const PUBLIC_BSKY_SERVICE =
   ENV_PUBLIC_BSKY_SERVICE || 'https://public.api.bsky.app'
 export const DEFAULT_SERVICE = BSKY_SERVICE
-export const HELP_DESK_URL = `https://tangled.org/jollywhoppers.com/witchsky.app/`
+export const HELP_DESK_URL = `https://github.com/uwx/purrsky`
 export const CHAT_SERVICE = 'https://api.bsky.chat'
 export const EMBED_SERVICE = 'https://embed.bsky.app'
 export const EMBED_SCRIPT = `${EMBED_SERVICE}/static/embed.js`
