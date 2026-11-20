@@ -21,6 +21,7 @@
 import '@terrazzo/tokens/index.css'
 import '@terrazzo/tiles/dist/all-components.css'
 import '@terrazzo/react-color-picker/dist/styles.css'
+import './colorSpaces'
 
 import {type SetStateAction, useEffect, useRef, useState} from 'react'
 import {View} from 'react-native'

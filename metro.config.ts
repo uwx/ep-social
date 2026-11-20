@@ -1,4 +1,6 @@
-// Learn more https://docs.expo.io/guides/customizing-metro
+// Learn more: https://docs.expo.io/guides/customizing-metro
+import path from 'node:path'
+
 import {getBundleModeMetroConfig} from 'react-native-worklets/bundleMode/index.js'
 import {type CustomResolver} from '@expo/metro/metro-resolver'
 import {getDefaultConfig} from '@expo/metro-config'
@@ -89,6 +91,39 @@ let config = getSentryExpoConfig(import.meta.dirname, {
        */
       if (platform === 'web' && /^shiki(\/|$)/.test(moduleName)) {
         return {type: 'empty'}
+      }
+      /*
+       * @use-gesture (via @terrazzo/tiles) keeps gesture config resolvers in a
+       * module-level Map, but publishes ESM and CJS builds that each own a copy
+       * of it. Metro picks the ESM build for `@use-gesture/react` and for the
+       * `@use-gesture/core/actions` subpath (no `exports` map there, so the
+       * `module` field wins), yet the `@use-gesture/core` root has an `exports`
+       * map with no `import`/`module` condition, so Metro takes its CJS
+       * wrapper. `registerAction` then writes into the ESM map while
+       * `Controller` reads the CJS one, and the first `useDrag` throws while
+       * parsing an undefined resolver. Resolve the root against the same ESM
+       * tree Metro already picked for the subpaths.
+       */
+      if (platform === 'web' && moduleName === '@use-gesture/core') {
+        const actions = context.resolveRequest(
+          context,
+          '@use-gesture/core/actions',
+          platform,
+        )
+        if (actions.type === 'sourceFile') {
+          /*
+           * Mirror the format Metro picked for the subpath, so the root and the
+           * actions modules always share one resolver map.
+           */
+          const esm = actions.filePath.endsWith('.esm.js')
+          return {
+            type: 'sourceFile',
+            filePath: path.resolve(
+              path.dirname(actions.filePath),
+              `../../dist/use-gesture-core.${esm ? 'esm' : 'cjs'}.js`,
+            ),
+          }
+        }
       }
       /*
        * react-native-webview has no web implementation (its fallback renders

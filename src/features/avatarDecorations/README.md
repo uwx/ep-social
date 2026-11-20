@@ -119,6 +119,15 @@ WebGL2 (jsdom included) would unmount the dialog when the shader init throws,
 so `canvasSupport.ts` gates it and those browsers get a transparent
 `<input type="color">` over the swatch instead.
 
+Two bundler footguns live in that picker's graph. `colorjs.io/fn` exports its
+color spaces unregistered, and `@terrazzo/token-tools`' registration side effect
+is deferred by Metro's inline requires, so `colorSpaces.ts` registers the CSS
+Color 4 set at module scope instead. `@use-gesture` publishes ESM and CJS builds
+that each own the gesture config registry, so `metro.config.ts` resolves the
+`@use-gesture/core` root to the same build format Metro already picks for its
+`actions` subpath; otherwise the first `useDrag` throws while parsing an
+undefined resolver.
+
 ## Regenerating the font catalog
 
 `node scripts/generate-google-fonts.mjs` rewrites `googleFonts.ts` from
