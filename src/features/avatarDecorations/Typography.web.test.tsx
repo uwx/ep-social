@@ -55,7 +55,7 @@ it('paints the name with the gradient and hides the base color', () => {
   )
   // The browser normalizes `transparent` to a zero-alpha color.
   expect(name.style.color).toBe('rgba(0, 0, 0, 0)')
-  expect(name.style.backgroundImage).toContain('#FF9D2B')
+  expect(name.style.backgroundImage).toContain('linear-gradient(90deg, ')
 })
 
 it('leaves plain text alone when there is no gradient', () => {

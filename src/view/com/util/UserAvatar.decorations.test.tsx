@@ -1,8 +1,8 @@
 import {msg} from '@lingui/core/macro'
 import {render} from '@testing-library/react-native'
 
-import {type DecorationFrame} from '#/features/avatarDecorations/catalog'
 import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {type DecorationFrame} from '#/features/avatarDecorations/catalog'
 
 const frame = (id: string, name: string, color: string): DecorationFrame => ({
   id,
@@ -52,15 +52,20 @@ jest.mock('#/components/Link', () => ({}))
 jest.mock('#/components/Menu', () => ({}))
 jest.mock('#/components/ProfileHoverCard', () => ({}))
 jest.mock('#/analytics', () => ({}))
-jest.mock('#/features/avatarDecorations', () => ({
-  AvatarDecorationRing:
-    require('#/features/avatarDecorations/AvatarDecorationRing')
-      .AvatarDecorationRing,
-  HexagonAvatar:
-    require('#/features/avatarDecorations/HexagonAvatar').HexagonAvatar,
-  useAvatarDecoration: () => undefined,
-  useAvatarShape: () => undefined,
-}))
+jest.mock('#/features/avatarDecorations', () => {
+  const ring = jest.requireActual<{
+    AvatarDecorationRing: React.ComponentType<{frame: DecorationFrame}>
+  }>('#/features/avatarDecorations/AvatarDecorationRing')
+  const hexagon = jest.requireActual<{
+    HexagonAvatar: React.ComponentType<Record<string, unknown>>
+  }>('#/features/avatarDecorations/HexagonAvatar')
+  return {
+    AvatarDecorationRing: ring.AvatarDecorationRing,
+    HexagonAvatar: hexagon.HexagonAvatar,
+    useAvatarDecoration: () => undefined,
+    useAvatarShape: () => undefined,
+  }
+})
 jest.mock('#/features/liveNow', () => ({}))
 jest.mock('#/features/liveNow/components/LiveIndicator', () => ({}))
 jest.mock('#/features/liveNow/components/LiveStatusDialog', () => ({}))

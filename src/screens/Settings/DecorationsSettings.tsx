@@ -15,6 +15,7 @@ import * as SettingsList from '#/screens/Settings/components/SettingsList'
 import {atoms as a, useTheme} from '#/alf'
 import {Admonition} from '#/components/Admonition'
 import {Button, ButtonText} from '#/components/Button'
+import * as Dialog from '#/components/Dialog'
 import * as Toggle from '#/components/forms/Toggle'
 import {Check_Stroke2_Corner0_Rounded as CheckIcon} from '#/components/icons/Check'
 import * as Layout from '#/components/Layout'
@@ -30,15 +31,25 @@ import {
   type DecorationDraft,
   draftFromSaved,
   draftToPatch,
-  getNameGradient,
+  getFrame,
   isDraftDirty,
   NAME_GRADIENTS,
   type NameGradient,
+  type NameGradientPaint,
   nameGradientTextStyle,
   resolveDraft,
+  resolveFrame,
+  resolveNamePaint,
   useMyDecorationSettingsQuery,
+  useNameFontAlias,
   useSetDecorations,
 } from '#/features/avatarDecorations'
+import {DecorationColorField} from './components/DecorationColorField'
+import {DecorationFontPickerDialog} from './components/DecorationFontPicker'
+import {
+  DecorationFontPreview,
+  DecorationNamePaintEditor,
+} from './components/DecorationNamePaintEditor'
 
 type Props = NativeStackScreenProps<CommonNavigatorParams, 'DecorationsSettings'>
 
@@ -54,8 +65,32 @@ export function DecorationsSettingsScreen({}: Props) {
     draftFromSaved(saved),
   )
   const selected = resolveDraft(draft, saved)
-  const selectedGradient = getNameGradient(selected.name)
+  // The saved settings and the draft share a shape for every name slot, so the
+  // preview resolves through the same function the feeds use.
+  const paint = resolveNamePaint({
+    name: selected.name,
+    nameColor: selected.nameColor,
+    nameGradient: selected.nameGradient,
+    nameOutline: selected.nameOutline,
+    nameFont: selected.nameFont,
+  })
+  const previewFrame = resolveFrame(selected.avatar, selected.avatarColor)
+  const previewFont = useNameFontAlias(paint?.font)
   const dirty = isDraftDirty(draft, saved)
+  const fontPicker = Dialog.useDialogControl()
+
+  const customNameSelected = !!selected.nameColor || !!selected.nameGradient
+  const hasNamePaint = !!(paint?.gradient || paint?.color)
+  const outlineStyle = paint
+    ? paint.gradient
+      ? nameGradientTextStyle(paint.gradient, {outline: paint.outline})
+      : paint.color
+        ? nameGradientTextStyle(
+            {colors: [paint.color], solid: paint.color},
+            {outline: paint.outline},
+          )
+        : undefined
+    : undefined
 
   const previewName = sanitizeDisplayName(
     profile?.displayName || sanitizeHandle(profile?.handle || ''),
@@ -112,19 +147,17 @@ export function DecorationsSettingsScreen({}: Props) {
               type="user"
               size={80}
               avatar={profile?.avatar}
-              decoration={DECORATION_FRAMES.find(f => f.id === selected.avatar)}
+              decoration={previewFrame}
               profileShape={selected.avatarShape}
             />
             <Text
-              gradient={selectedGradient}
+              gradient={paint?.gradient}
               style={[
                 a.text_2xl,
                 a.font_bold,
                 t.atoms.text,
-                selectedGradient &&
-                  nameGradientTextStyle(selectedGradient, {
-                    outline: selected.nameOutline,
-                  }),
+                previewFont ? {fontFamily: previewFont} : null,
+                outlineStyle,
               ]}
               numberOfLines={1}>
               {previewName}
@@ -156,19 +189,48 @@ export function DecorationsSettingsScreen({}: Props) {
                   <ChoiceButton
                     testID="decoration-frame-none"
                     label={l`None`}
-                    selected={!selected.avatar}
-                    onPress={() => edit({avatar: undefined})}
+                    selected={!selected.avatar && !selected.avatarColor}
+                    onPress={() =>
+                      edit({avatar: undefined, avatarColor: undefined})
+                    }
                   />
                   {DECORATION_FRAMES.map(item => (
                     <ChoiceButton
                       key={item.id}
                       testID={`decoration-frame-${item.id}`}
                       label={i18n._(item.name)}
-                      selected={selected.avatar === item.id}
-                      onPress={() => edit({avatar: item.id})}
+                      selected={
+                        selected.avatar === item.id && !selected.avatarColor
+                      }
+                      onPress={() =>
+                        edit({avatar: item.id, avatarColor: undefined})
+                      }
                     />
                   ))}
+                  <ChoiceButton
+                    testID="decoration-frame-custom"
+                    label={l`Custom`}
+                    selected={!!selected.avatarColor}
+                    onPress={() =>
+                      edit({
+                        avatarColor:
+                          selected.avatarColor ??
+                          getFrame(selected.avatar)?.color ??
+                          DEFAULT_FRAME_COLOR,
+                      })
+                    }
+                  />
                 </View>
+                {selected.avatarColor && (
+                  <View style={[a.pb_lg]}>
+                    <DecorationColorField
+                      label={l`Frame color`}
+                      value={selected.avatarColor}
+                      onChange={color => edit({avatarColor: color})}
+                      testID="decoration-frame-color"
+                    />
+                  </View>
+                )}
               </SettingsList.Group>
 
               <SettingsList.Divider />
@@ -205,18 +267,55 @@ export function DecorationsSettingsScreen({}: Props) {
                 <View style={[a.flex_row, a.flex_wrap, a.gap_sm, a.pb_lg]}>
                   <NoneSwatch
                     testID="decoration-gradient-none"
-                    selected={!selected.name}
-                    onPress={() => edit({name: undefined})}
+                    selected={!selected.name && !customNameSelected}
+                    onPress={() =>
+                      edit({
+                        name: undefined,
+                        nameColor: undefined,
+                        nameGradient: undefined,
+                      })
+                    }
+                  />
+                  <CustomNameSwatch
+                    selected={customNameSelected}
+                    nameColor={selected.nameColor}
+                    nameGradient={selected.nameGradient}
+                    onPress={() => {
+                      if (!customNameSelected) {
+                        edit({
+                          name: undefined,
+                          nameColor: DEFAULT_NAME_COLOR,
+                        })
+                      }
+                    }}
                   />
                   {NAME_GRADIENTS.map(gradient => (
                     <GradientSwatch
                       key={gradient.id}
                       gradient={gradient}
-                      selected={selected.name === gradient.id}
-                      onPress={() => edit({name: gradient.id})}
+                      selected={
+                        !customNameSelected && selected.name === gradient.id
+                      }
+                      onPress={() =>
+                        edit({
+                          name: gradient.id,
+                          nameColor: undefined,
+                          nameGradient: undefined,
+                        })
+                      }
                     />
                   ))}
                 </View>
+
+                {customNameSelected && (
+                  <View style={[a.pb_lg]}>
+                    <DecorationNamePaintEditor
+                      nameColor={selected.nameColor}
+                      nameGradient={selected.nameGradient}
+                      onChange={patch => edit({name: undefined, ...patch})}
+                    />
+                  </View>
+                )}
               </SettingsList.Group>
 
               <SettingsList.Group contentContainerStyle={[a.gap_sm]}>
@@ -224,7 +323,7 @@ export function DecorationsSettingsScreen({}: Props) {
                   name="decoration_name_outline"
                   label={l`Outline`}
                   value={selected.nameOutline}
-                  disabled={!selected.name}
+                  disabled={!hasNamePaint}
                   onChange={value => edit({nameOutline: value})}
                   style={[a.w_full]}>
                   <Toggle.LabelText style={[a.flex_1]}>
@@ -240,10 +339,69 @@ export function DecorationsSettingsScreen({}: Props) {
                   ]}>
                   <Trans>
                     Adds a dark edge so the name stays readable on any
-                    background.
+                    background. It turns white when the name itself is dark.
                   </Trans>
                 </Text>
               </SettingsList.Group>
+
+              <SettingsList.Divider />
+
+              <SettingsList.Group contentContainerStyle={[a.gap_sm]}>
+                <SettingsList.ItemText>
+                  <Trans>Name font</Trans>
+                </SettingsList.ItemText>
+                <View
+                  style={[a.flex_row, a.align_center, a.gap_sm, a.pb_lg]}>
+                  <View style={[a.flex_1, {minWidth: 0}]}>
+                    <DecorationFontPreview
+                      family={selected.nameFont}
+                      fallback={l`Default font`}
+                      style={[
+                        a.text_lg,
+                        selected.nameFont ? t.atoms.text : t.atoms.text_contrast_medium,
+                      ]}
+                    />
+                  </View>
+                  <Button
+                    testID="decoration-font-pick"
+                    label={l`Choose font`}
+                    size="small"
+                    color="secondary"
+                    onPress={fontPicker.open}>
+                    <ButtonText>
+                      <Trans>Choose</Trans>
+                    </ButtonText>
+                  </Button>
+                  {selected.nameFont && (
+                    <Button
+                      testID="decoration-font-default"
+                      label={l`Default font`}
+                      size="small"
+                      color="secondary"
+                      onPress={() => edit({nameFont: undefined})}>
+                      <ButtonText>
+                        <Trans>Default</Trans>
+                      </ButtonText>
+                    </Button>
+                  )}
+                </View>
+                <Text
+                  style={[
+                    a.text_xs,
+                    a.leading_snug,
+                    t.atoms.text_contrast_medium,
+                  ]}>
+                  <Trans>
+                    Fonts load from Google Fonts when someone first sees the
+                    name. Emoji keep their own font.
+                  </Trans>
+                </Text>
+              </SettingsList.Group>
+              <DecorationFontPickerDialog
+                control={fontPicker}
+                selected={selected.nameFont}
+                onSelect={family => edit({nameFont: family})}
+              />
 
               <View style={[a.px_lg, a.py_xl]}>
                 <Button
@@ -278,6 +436,81 @@ const SHAPE_LABELS: Record<AvatarShape, MessageDescriptor> = {
 }
 
 const SWATCH_HEIGHT = 52
+
+/** Ring color a custom frame starts at when no frame is selected yet. */
+const DEFAULT_FRAME_COLOR = '#c084fc'
+
+/** Fill a custom name starts at when the user switches away from a preset. */
+const DEFAULT_NAME_COLOR = '#7c3aed'
+
+/**
+ * Swatch that opens the custom paint editor. Shows the current custom paint so
+ * the row still reads as a color chip rather than a button.
+ */
+function CustomNameSwatch({
+  selected,
+  nameColor,
+  nameGradient,
+  onPress,
+}: {
+  selected: boolean
+  nameColor?: string
+  nameGradient?: NameGradientPaint
+  onPress: () => void
+}) {
+  const {t: l} = useLingui()
+  const t = useTheme()
+  const colors = nameGradient?.hard
+    ? nameGradient.colors.flatMap(color => [color, color])
+    : (nameGradient?.colors ?? [nameColor ?? DEFAULT_NAME_COLOR])
+  const locations = nameGradient?.hard
+    ? (nameGradient.colors.flatMap((_, index) => [
+        index / nameGradient.colors.length,
+        (index + 1) / nameGradient.colors.length,
+      ]) as [number, number, ...number[]])
+    : undefined
+
+  return (
+    <Pressable
+      testID="decoration-gradient-custom"
+      accessibilityRole="button"
+      accessibilityLabel={l`Custom`}
+      accessibilityHint=""
+      accessibilityState={{selected}}
+      onPress={onPress}
+      style={[
+        a.rounded_md,
+        a.overflow_hidden,
+        {height: SWATCH_HEIGHT, flexBasis: '31%', flexGrow: 1},
+        selected
+          ? {borderWidth: 2, borderColor: t.atoms.text.color}
+          : {
+              borderWidth: 1,
+              borderColor: t.atoms.border_contrast_low.borderColor,
+            },
+      ]}>
+      <LinearGradient
+        colors={colors as [string, string, ...string[]]}
+        locations={locations}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}
+        style={[a.absolute, a.inset_0]}
+      />
+      <View style={[a.flex_1, a.align_center, a.justify_center, a.px_sm]}>
+        <View
+          style={[
+            a.rounded_full,
+            a.px_xs,
+            {maxWidth: '100%', backgroundColor: 'rgba(0, 0, 0, 0.75)'},
+          ]}>
+          <Text numberOfLines={1} style={[a.text_sm, a.font_bold, {color: '#FFFFFF'}]}>
+            <Trans>Custom</Trans>
+          </Text>
+        </View>
+      </View>
+    </Pressable>
+  )
+}
 
 function ChoiceButton({
   testID,

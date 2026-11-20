@@ -335,6 +335,10 @@ const schema = z.object({
   disableVerifyEmailReminder: z.boolean().optional(),
   showViaClient: z.boolean().optional(),
   hideDisplayNames: z.boolean().optional(),
+  /** Draw an edge around decorated display names regardless of the author. */
+  showNameOutlines: z.boolean().optional(),
+  /** Ignore custom display-name colors and fonts written by other accounts. */
+  disableCustomNameStyles: z.boolean().optional(),
   replyIconIndicators: z.boolean().optional(),
   showThreadPostNumbers: z.boolean().optional(),
   sixSevenCelebration: z.boolean().optional(),
@@ -553,6 +557,8 @@ export const defaults: Schema = {
   disableVerifyEmailReminder: false,
   showViaClient: true,
   hideDisplayNames: false,
+  showNameOutlines: false,
+  disableCustomNameStyles: false,
   replyIconIndicators: true,
   showThreadPostNumbers: true,
   sixSevenCelebration: true,

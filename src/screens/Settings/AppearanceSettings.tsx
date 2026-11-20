@@ -11,6 +11,10 @@ import {
   type NativeStackScreenProps,
 } from '#/lib/routes/types'
 import {
+  useDisableCustomNameStyles,
+  useSetDisableCustomNameStyles,
+} from '#/state/preferences/custom-name-styles'
+import {
   useEnableSquareAvatars,
   useSetEnableSquareAvatars,
 } from '#/state/preferences/enable-square-avatars'
@@ -23,6 +27,10 @@ import {
   useSetHideDisplayNames,
 } from '#/state/preferences/hide-display-names'
 import {useKawaiiMode, useSetKawaiiMode} from '#/state/preferences/kawaii'
+import {
+  useSetShowNameOutlines,
+  useShowNameOutlines,
+} from '#/state/preferences/name-outlines'
 import {
   useRepostCarouselEnabled,
   useSetRepostCarouselEnabled,
@@ -88,6 +96,12 @@ export function AppearanceSettingsScreen({}: Props) {
 
   const hideDisplayNames = useHideDisplayNames()
   const setHideDisplayNames = useSetHideDisplayNames()
+
+  const showNameOutlines = useShowNameOutlines()
+  const setShowNameOutlines = useSetShowNameOutlines()
+
+  const disableCustomNameStyles = useDisableCustomNameStyles()
+  const setDisableCustomNameStyles = useSetDisableCustomNameStyles()
 
   useEffect(() => {
     if (!preview) return
@@ -293,6 +307,34 @@ export function AppearanceSettingsScreen({}: Props) {
                   <SettingsList.ItemIcon icon={AtIcon} />
                   <SettingsList.ItemText>
                     <Trans>Hide display names</Trans>
+                  </SettingsList.ItemText>
+                  <Toggle.Platform />
+                </SettingsList.Item>
+              </Toggle.Item>
+
+              <Toggle.Item
+                name="show_name_outlines"
+                label={l`Outline custom display names`}
+                value={showNameOutlines}
+                onChange={value => setShowNameOutlines(value)}>
+                <SettingsList.Item>
+                  <SettingsList.ItemIcon icon={SparkleIcon} />
+                  <SettingsList.ItemText>
+                    <Trans>Outline custom display names</Trans>
+                  </SettingsList.ItemText>
+                  <Toggle.Platform />
+                </SettingsList.Item>
+              </Toggle.Item>
+
+              <Toggle.Item
+                name="disable_custom_name_styles"
+                label={l`Ignore custom name colors and fonts`}
+                value={disableCustomNameStyles}
+                onChange={value => setDisableCustomNameStyles(value)}>
+                <SettingsList.Item>
+                  <SettingsList.ItemIcon icon={Aa} />
+                  <SettingsList.ItemText>
+                    <Trans>Ignore custom name colors and fonts</Trans>
                   </SettingsList.ItemText>
                   <Toggle.Platform />
                 </SettingsList.Item>

@@ -1,5 +1,6 @@
 import {type AvatarShape} from './avatarShapes'
-import {type DecorationSettings} from './records'
+import {normalizeHex} from './oklch'
+import {type DecorationSettings, type NameGradientPaint} from './records'
 
 /**
  * Editable copy of the saved decorations. Nothing is written until Save, and
@@ -12,6 +13,10 @@ export type DecorationDraft = {
   avatarShape?: AvatarShape
   name?: string
   nameOutline: boolean
+  avatarColor?: string
+  nameColor?: string
+  nameGradient?: NameGradientPaint
+  nameFont?: string
 }
 
 export function draftFromSaved(saved: DecorationSettings): DecorationDraft {
@@ -21,6 +26,10 @@ export function draftFromSaved(saved: DecorationSettings): DecorationDraft {
     avatarShape: saved.avatarShape,
     name: saved.name,
     nameOutline: !!saved.nameOutline,
+    avatarColor: saved.avatarColor,
+    nameColor: saved.nameColor,
+    nameGradient: saved.nameGradient,
+    nameFont: saved.nameFont,
   }
 }
 
@@ -35,13 +44,51 @@ export function resolveDraft(
 /**
  * Applies one edit. Choosing a slot captures the resolved values first, so the
  * untouched slots keep showing the saved record instead of resetting.
+ *
+ * Colors are normalized on the way in: the record layer lowercases every hex it
+ * reads or writes, so an edit that kept the typed casing would compare unequal
+ * to the saved record and leave the screen permanently dirty after a save.
  */
 export function applyDraftEdit(
   draft: DecorationDraft,
   saved: DecorationSettings,
   patch: Partial<Omit<DecorationDraft, 'touched'>>,
 ): DecorationDraft {
-  return {...resolveDraft(draft, saved), ...patch, touched: true}
+  const next: DecorationDraft = {
+    ...resolveDraft(draft, saved),
+    ...patch,
+    touched: true,
+  }
+  if ('avatarColor' in patch) {
+    next.avatarColor = normalizeHex(patch.avatarColor) ?? undefined
+  }
+  if ('nameColor' in patch) {
+    next.nameColor = normalizeHex(patch.nameColor) ?? undefined
+  }
+  if ('nameGradient' in patch) {
+    const colors = patch.nameGradient?.colors
+    next.nameGradient = colors
+      ? {
+          ...patch.nameGradient,
+          colors: colors.map(color => normalizeHex(color) ?? color),
+        }
+      : undefined
+  }
+  return next
+}
+
+/** Gradient paints are rebuilt on every slider move, so compare by value. */
+function sameGradient(
+  a: NameGradientPaint | undefined,
+  b: NameGradientPaint | undefined,
+) {
+  if (a === b) return true
+  if (!a || !b) return false
+  return (
+    !!a.hard === !!b.hard &&
+    a.colors.length === b.colors.length &&
+    a.colors.every((color, index) => color === b.colors[index])
+  )
 }
 
 /** Whether the draft differs from the stored record in any slot. */
@@ -55,7 +102,11 @@ export function isDraftDirty(
     (resolved.avatar !== saved.avatar ||
       resolved.avatarShape !== saved.avatarShape ||
       resolved.name !== saved.name ||
-      resolved.nameOutline !== !!saved.nameOutline)
+      resolved.nameOutline !== !!saved.nameOutline ||
+      resolved.avatarColor !== saved.avatarColor ||
+      resolved.nameColor !== saved.nameColor ||
+      resolved.nameFont !== saved.nameFont ||
+      !sameGradient(resolved.nameGradient, saved.nameGradient))
   )
 }
 
@@ -70,5 +121,9 @@ export function draftToPatch(
     avatarShape: resolved.avatarShape,
     name: resolved.name,
     nameOutline: resolved.nameOutline,
+    avatarColor: resolved.avatarColor,
+    nameColor: resolved.nameColor,
+    nameGradient: resolved.nameGradient,
+    nameFont: resolved.nameFont,
   }
 }

@@ -5,14 +5,20 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
 import {useDeferredEnable} from '#/lib/hooks/useDeferredEnable'
 import {isRecordNotFoundError} from '#/lib/xrpc-error'
+import {
+  useDisableCustomNameStyles,
+  useShowNameOutlines,
+} from '#/state/preferences'
 import {useSlingshotInstance} from '#/state/preferences/slingshot-instance'
 import {STALE} from '#/state/queries'
 import {createQueryKey} from '#/state/queries/util'
 import {usePdsClient, useSession} from '#/state/session'
 import {com} from '#/lexicons'
-import {type DecorationFrame, getFrame} from './catalog'
-import {getNameGradient, type NameGradient} from './nameGradients'
+import {type DecorationFrame, resolveFrame} from './catalog'
+import {useNameFontAlias} from './nameFonts'
+import {type NameGradientSpec} from './nameGradients'
 import {nameGradientTextStyle} from './nameGradientStyle'
+import {resolveNamePaint} from './namePaint'
 import {
   buildDecorationRecord,
   type DecorationSettings,
@@ -43,11 +49,26 @@ function useActiveDecorations(did: string | undefined) {
   return data
 }
 
-/** Active avatar frame for a DID, or undefined. */
+/**
+ * The paint a DID's display name needs, honouring the viewer's display
+ * options, or undefined when the name should render plainly.
+ */
+function useResolvedNamePaint(did: string | undefined) {
+  const active = useActiveDecorations(did)
+  const forceOutline = useShowNameOutlines()
+  const customDisabled = useDisableCustomNameStyles()
+  return resolveNamePaint(active, {forceOutline, customDisabled})
+}
+
+/**
+ * Active avatar frame for a DID, or undefined. A record can name a color
+ * without a curated frame, which renders as a plain ring in that color.
+ */
 export function useAvatarDecoration(
   did: string | undefined,
 ): DecorationFrame | undefined {
-  return getFrame(useActiveDecorations(did)?.avatar)
+  const active = useActiveDecorations(did)
+  return resolveFrame(active?.avatar, active?.avatarColor)
 }
 
 /** Active avatar shape for a DID, or undefined when the viewer default applies. */
@@ -58,20 +79,42 @@ export function useAvatarShape(did: string | undefined) {
 /** Active display-name gradient for a DID, or undefined. */
 export function useNameGradient(
   did: string | undefined,
-): NameGradient | undefined {
-  return getNameGradient(useActiveDecorations(did)?.name)
+): NameGradientSpec | undefined {
+  return useResolvedNamePaint(did)?.gradient
 }
 
 /**
- * Computed text style for a DID's display name (gradient plus optional
- * outline), or undefined. Spread into a name's style array at the call site so
- * both the gradient and the outline resolve in one place.
+ * Computed text style for a DID's display name (paint, outline, and font), or
+ * undefined. Spread into a name's style array at the call site so the whole
+ * decoration resolves in one place.
+ *
+ * The font alias stays undefined until the face has loaded, so a name renders
+ * in the app font rather than flashing a fallback.
  */
 export function useNameStyle(did: string | undefined): TextStyle | undefined {
-  const active = useActiveDecorations(did)
-  const gradient = getNameGradient(active?.name)
-  if (!gradient) return undefined
-  return nameGradientTextStyle(gradient, {outline: active?.nameOutline})
+  const paint = useResolvedNamePaint(did)
+  const fontAlias = useNameFontAlias(paint?.font)
+  if (!paint) return undefined
+
+  const style: {-readonly [K in keyof TextStyle]: TextStyle[K]} = {}
+  if (paint.gradient) {
+    Object.assign(
+      style,
+      nameGradientTextStyle(paint.gradient, {outline: paint.outline}),
+    )
+  } else if (paint.color) {
+    // A flat fill narrows to a one-stop gradient so the edge is drawn by the
+    // same code path as a gradient name.
+    Object.assign(
+      style,
+      nameGradientTextStyle(
+        {colors: [paint.color], solid: paint.color},
+        {outline: paint.outline},
+      ),
+    )
+  }
+  if (fontAlias) style.fontFamily = fontAlias
+  return style
 }
 
 const myDecorationSettingsQueryRoot = 'myDecorationSettings'

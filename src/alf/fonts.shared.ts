@@ -93,6 +93,21 @@ export function applyFonts(
   fontFamily: 'material' | 'system' | 'theme',
   letterSpacing = true,
 ) {
+  /*
+   * A caller already chose a family (a decorated display name uses a Google
+   * font), so the app font setting must not overwrite it. Runtime faces have a
+   * single weight, so their weight and slant are dropped rather than
+   * synthesized.
+   */
+  if (style.fontFamily) {
+    if (IS_WEB) {
+      style.fontFamily += `, ${WEB_FONT_FAMILIES}`
+    }
+    delete style.fontWeight
+    delete style.fontStyle
+    return
+  }
+
   if (IS_ANDROID && fontFamily === 'material') {
     const weight = Number(style.fontWeight || 400)
     style.fontFamily = getGoogleSansFlex(weight, style.fontSize)

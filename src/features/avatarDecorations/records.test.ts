@@ -139,3 +139,81 @@ describe('buildDecorationRecord', () => {
     })
   })
 })
+
+describe('custom paint slots', () => {
+  it('reads colors, gradients, and fonts from a record', () => {
+    expect(
+      parseDecorationSettings({
+        avatarColor: '#ABCDEF',
+        nameColor: 'abc',
+        nameGradient: {colors: ['#FF0000', '#00FF00'], hard: true},
+        nameFont: 'Inter',
+      }),
+    ).toEqual({
+      avatarColor: '#abcdef',
+      nameColor: '#aabbcc',
+      nameGradient: {colors: ['#ff0000', '#00ff00'], hard: true},
+      nameFont: 'Inter',
+    })
+  })
+
+  it('rejects gradient and font shapes this build cannot render', () => {
+    expect(
+      parseDecorationSettings({
+        nameGradient: {colors: ['#FF0000']},
+        nameFont: 'Inter; background: red',
+      }),
+    ).toEqual({})
+    expect(
+      parseDecorationSettings({nameGradient: {colors: ['red', 'blue']}}),
+    ).toEqual({})
+    expect(
+      parseDecorationSettings({
+        nameGradient: {colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFFFF']},
+      }),
+    ).toEqual({})
+  })
+
+  it('stores one name paint and clears the others', () => {
+    const gradient = buildDecorationRecord(
+      {name: 'sunset', nameColor: '#123456'},
+      {nameGradient: {colors: ['#FF0000', '#0000FF']}},
+    )
+    expect(gradient).toMatchObject({
+      nameGradient: {colors: ['#ff0000', '#0000ff']},
+    })
+    expect(gradient).not.toHaveProperty('name')
+    expect(gradient).not.toHaveProperty('nameColor')
+
+    // Callers clear the other paint explicitly; a gradient left in place wins.
+    const solid = buildDecorationRecord(
+      {name: 'sunset', nameGradient: {colors: ['#FF0000', '#0000FF']}},
+      {nameColor: '#123456', nameGradient: undefined},
+    )
+    expect(solid.nameColor).toBe('#123456')
+    expect(solid).not.toHaveProperty('name')
+    expect(solid).not.toHaveProperty('nameGradient')
+  })
+
+  it('keeps a name paint on a record that names two of them', () => {
+    // A record written by another client could carry both; the gradient wins.
+    const record = buildDecorationRecord(
+      {nameColor: '#123456', nameGradient: {colors: ['#FF0000', '#0000FF']}},
+      {},
+    )
+    expect(record).toHaveProperty('nameGradient')
+    expect(record).not.toHaveProperty('nameColor')
+  })
+
+  it('keeps the outline for a custom paint and drops it for a lone font', () => {
+    expect(
+      buildDecorationRecord(
+        {nameOutline: true},
+        {nameColor: '#123456'},
+      ).nameOutline,
+    ).toBe(true)
+    expect(
+      buildDecorationRecord({nameOutline: true}, {nameFont: 'Inter'}),
+    ).not.toHaveProperty('nameOutline')
+  })
+})

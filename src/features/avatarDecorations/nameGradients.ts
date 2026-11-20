@@ -23,6 +23,18 @@ export type NameGradient = {
   solid: string
 }
 
+/**
+ * The part of a gradient renderers need. Curated gradients and arbitrary ones
+ * from a record both narrow to this, so a name is painted the same way whether
+ * the user picked a preset or mixed their own colors.
+ */
+export type NameGradientSpec = {
+  colors: string[]
+  segmented?: boolean
+  /** Flat fill used where a real gradient is unavailable. */
+  solid?: string
+}
+
 export const NAME_GRADIENTS: NameGradient[] = [
   {
     id: 'sunset',

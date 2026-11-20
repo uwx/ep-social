@@ -152,3 +152,6 @@ bskyweb/static/sw.js
 bskyweb/static/workbox-*.js
 bskyweb/static/fonts/
 bskyweb/static/style.css
+
+# Google Fonts metadata cache for scripts/generate-google-fonts.mjs
+scripts/.cache/

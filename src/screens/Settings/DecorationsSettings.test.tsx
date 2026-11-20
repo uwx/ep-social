@@ -6,7 +6,10 @@ import {fireEvent, render} from '@testing-library/react-native'
 import {DecorationsSettingsScreen} from './DecorationsSettings'
 
 const i18n = setupI18n({locale: 'en', messages: {en: {}}})
-const mockMutate = jest.fn()
+const mockMutate = jest.fn<
+  void,
+  [Record<string, unknown>, {onSuccess?: () => void}]
+>()
 const mockSettings = {
   data: {} as Record<string, unknown>,
   isLoading: false,
@@ -56,16 +59,41 @@ jest.mock('#/features/avatarDecorations', () => {
   const gradients: Record<string, unknown> = jest.requireActual(
     '#/features/avatarDecorations/nameGradients',
   )
+  const oklch: Record<string, unknown> = jest.requireActual(
+    '#/features/avatarDecorations/oklch',
+  )
+  const paint: Record<string, unknown> = jest.requireActual(
+    '#/features/avatarDecorations/namePaint',
+  )
+  const googleFonts: Record<string, unknown> = jest.requireActual(
+    '#/features/avatarDecorations/googleFonts',
+  )
   return {
     ...shapes,
     ...catalog,
     ...draft,
     ...gradients,
+    ...oklch,
+    ...paint,
+    ...googleFonts,
     nameGradientTextStyle: () => ({}),
+    useNameFontAlias: () => undefined,
+    useNameFontPreviewAlias: () => undefined,
     useMyDecorationSettingsQuery: () => mockSettings,
     useSetDecorations: () => ({mutate: mockMutate, isPending: false}),
   }
 })
+jest.mock('#/lib/haptics', () => ({
+  useHaptics: () => ({selection: jest.fn(), tap: jest.fn()}),
+}))
+jest.mock('#/components/Dialog', () => ({
+  useDialogControl: () => ({open: jest.fn(), close: jest.fn()}),
+  useDialogContext: () => ({close: jest.fn()}),
+  Outer: ({children}: {children?: React.ReactNode}) => children ?? null,
+  Handle: () => null,
+  Close: () => null,
+  InnerFlatList: () => null,
+}))
 jest.mock('#/view/com/util/UserAvatar', () => {
   const react: typeof import('react') = jest.requireActual('react')
   const rn: typeof import('react-native') = jest.requireActual('react-native')
@@ -162,6 +190,9 @@ jest.mock('#/components/Typography', () => {
   return {Text: rn.Text}
 })
 jest.mock('#/components/Loader', () => ({Loader: () => null}))
+// The native slider package needs a host environment the test renderer lacks;
+// these tests drive the color field through its hex input.
+jest.mock('#/components/forms/Slider', () => ({Slider: () => null}))
 jest.mock('#/components/Toast', () => ({show: jest.fn()}))
 jest.mock('#/components/Admonition', () => ({
   Admonition: ({children}: {children: React.ReactNode}) => children,
@@ -170,11 +201,39 @@ jest.mock('#/components/Pressable', () => {
   const rn: typeof import('react-native') = jest.requireActual('react-native')
   return {Pressable: rn.Pressable}
 })
-jest.mock('#/components/forms/Toggle', () => ({
-  Item: ({children}: {children: React.ReactNode}) => children,
-  LabelText: ({children}: {children: React.ReactNode}) => children,
-  Platform: () => null,
-}))
+jest.mock('#/components/forms/Toggle', () => {
+  const react: typeof import('react') = jest.requireActual('react')
+  const rn: typeof import('react-native') = jest.requireActual('react-native')
+  const {createElement: h} = react
+  const {Pressable} = rn
+  return {
+    Item: ({
+      label,
+      value,
+      onChange,
+      disabled,
+      children,
+    }: {
+      label: string
+      value?: boolean
+      onChange?: (value: boolean) => void
+      disabled?: boolean
+      children?: React.ReactNode
+    }) =>
+      h(
+        Pressable,
+        {
+          accessibilityLabel: label,
+          accessibilityState: {checked: !!value, disabled: !!disabled},
+          disabled,
+          onPress: () => onChange?.(!value),
+        },
+        children,
+      ),
+    LabelText: ({children}: {children?: React.ReactNode}) => children ?? null,
+    Platform: () => null,
+  }
+})
 jest.mock('expo-linear-gradient', () => {
   const react: typeof import('react') = jest.requireActual('react')
   const rn: typeof import('react-native') = jest.requireActual('react-native')
@@ -264,4 +323,53 @@ it('clears a slot by choosing None', () => {
     {avatar: undefined, name: undefined, avatarShape: undefined, nameOutline: false},
     expect.anything(),
   )
+})
+
+it('stores an arbitrary frame color without a preset frame', () => {
+  const {getByTestId, getByLabelText} = renderScreen()
+
+  fireEvent.press(getByTestId('decoration-frame-custom'))
+  fireEvent.changeText(getByTestId('decoration-frame-color-hex'), '#123456')
+  fireEvent.press(getByLabelText('Save'))
+
+  expect(mockMutate).toHaveBeenCalledWith(
+    expect.objectContaining({avatar: undefined, avatarColor: '#123456'}),
+    expect.anything(),
+  )
+})
+
+it('stores an arbitrary solid name color and drops the preset', () => {
+  mockSettings.data = {name: 'rose'}
+  const {getByTestId, getByLabelText} = renderScreen()
+
+  fireEvent.press(getByTestId('decoration-gradient-custom'))
+  fireEvent.changeText(getByTestId('decoration-name-color-hex'), '#00ff88')
+  fireEvent.press(getByLabelText('Save'))
+
+  expect(mockMutate).toHaveBeenCalledWith(
+    expect.objectContaining({
+      name: undefined,
+      nameColor: '#00ff88',
+      nameGradient: undefined,
+    }),
+    expect.anything(),
+  )
+})
+
+it('stores a custom 3-stop gradient and never keeps a second paint', () => {
+  const {getByTestId, getByLabelText} = renderScreen()
+
+  fireEvent.press(getByTestId('decoration-gradient-custom'))
+  fireEvent.press(getByLabelText('Gradient'))
+  fireEvent.press(getByLabelText('Three colors'))
+  fireEvent.press(getByLabelText('Hard edges'))
+  fireEvent.press(getByLabelText('Save'))
+
+  const [patch] = mockMutate.mock.calls[0]
+  expect(patch.nameColor).toBeUndefined()
+  expect(patch.name).toBeUndefined()
+  expect(patch.nameGradient).toEqual({
+    colors: ['#7c3aed', '#28acdc', '#f2571f'],
+    hard: true,
+  })
 })

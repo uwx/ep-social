@@ -14,6 +14,7 @@ import {Provider as CompactPostsProvider} from './compact-posts'
 import {Provider as ConfirmFollowProvider} from './confirm-follow'
 import {Provider as ConstellationProvider} from './constellation-enabled'
 import {Provider as ConstellationInstanceProvider} from './constellation-instance'
+import {Provider as CustomNameStylesProvider} from './custom-name-styles'
 import {Provider as DeckLayoutProvider} from './deck-layout'
 import {Provider as DeerVerificationProvider} from './deer-verification'
 import {Provider as DirectFetchRecordsProvider} from './direct-fetch-records'
@@ -48,6 +49,7 @@ import {Provider as LanguagesProvider} from './languages'
 import {Provider as LargeAltBadgeProvider} from './large-alt-badge'
 import {Provider as LoadSmallPNGsProvider} from './load-small-pngs'
 import {MetricsDisplayPreferencesProvider} from './metrics-display-preference'
+import {Provider as NameOutlinesProvider} from './name-outlines'
 import {Provider as NoDiscoverProvider} from './no-discover-fallback'
 import {Provider as OmitViaFieldProvider} from './omit-via-field'
 import {Provider as OpenRouterProvider} from './openrouter'
@@ -101,6 +103,10 @@ export {
 export {useAutoplayDisabled, useSetAutoplayDisabled} from './autoplay'
 export {useCompactPosts, useSetCompactPosts} from './compact-posts'
 export {useConfirmFollow, useSetConfirmFollow} from './confirm-follow'
+export {
+  useDisableCustomNameStyles,
+  useSetDisableCustomNameStyles,
+} from './custom-name-styles'
 export {useDeckLayoutEnabled, useSetDeckLayoutEnabled} from './deck-layout'
 export {
   useDisableComposerPrompt,
@@ -134,6 +140,10 @@ export {
 export {useImageCdnHost, useSetImageCdnHost} from './image-cdn-host'
 export {useLabelDefinitions} from './label-defs'
 export {useLanguagePrefs, useLanguagePrefsApi} from './languages'
+export {
+  useSetShowNameOutlines,
+  useShowNameOutlines,
+} from './name-outlines'
 export {useOmitViaField, useSetOmitViaField} from './omit-via-field'
 export {
   useOpenRouterApiKey,
@@ -277,9 +287,13 @@ export function Provider({children}: PropsWithChildren<{}>) {
                                                                                                                                                                   <TagSearchInstanceProvider>
                                                                                                                                                                     <DeckLayoutProvider>
                                                                                                                                                                       <ShowThreadPostNumbersProvider>
-                                                                                                                                                                        {
-                                                                                                                                                                          children
-                                                                                                                                                                        }
+                                                                                                                                                                        <NameOutlinesProvider>
+                                                                                                                                                                          <CustomNameStylesProvider>
+                                                                                                                                                                            {
+                                                                                                                                                                              children
+                                                                                                                                                                            }
+                                                                                                                                                                          </CustomNameStylesProvider>
+                                                                                                                                                                        </NameOutlinesProvider>
                                                                                                                                                                       </ShowThreadPostNumbersProvider>
                                                                                                                                                                     </DeckLayoutProvider>
                                                                                                                                                                   </TagSearchInstanceProvider>

@@ -37,8 +37,8 @@ it('gives the first and last letters the gradient end colors', () => {
     </GradientNameText>,
   )
 
-  expect(getByText('a')).toHaveStyle({color: 'rgb(255, 0, 0)'})
-  expect(getByText('b')).toHaveStyle({color: 'rgb(0, 0, 255)'})
+  expect(getByText('a')).toHaveStyle({color: '#ff0000'})
+  expect(getByText('b')).toHaveStyle({color: '#0000ff'})
 })
 
 it('bands segmented gradients into flat colors instead of blending', () => {

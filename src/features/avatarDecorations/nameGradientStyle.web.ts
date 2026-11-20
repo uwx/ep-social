@@ -1,6 +1,10 @@
 import {type TextStyle} from 'react-native'
 
-import {type NameGradient} from './nameGradients'
+import {type NameGradientSpec} from './nameGradients'
+import {gradientSamples, outlineColorFor} from './oklch'
+
+/** Samples per gradient. More than this is invisible at name sizes. */
+const SAMPLE_COUNT = 9
 
 /**
  * Paints a decorated display name with a real gradient via
@@ -8,14 +12,26 @@ import {type NameGradient} from './nameGradients'
  * behind it. Placed last in a style array so `color: transparent` overrides
  * the theme text color.
  *
- * `outline` draws a dark edge around the letters. The outline doubles as a
- * contrast guarantee: a gradient name reads on any background once it has a
- * hard edge.
+ * Browsers interpolate hex stops in sRGB, so a two-stop gradient would take a
+ * different path than the same gradient on native. Sampling in OKLCH first and
+ * handing the browser nine stops keeps the visible ramp the same on both.
+ *
+ * `outline` draws an edge around the letters: dark, or white when the fill is
+ * dark enough to swallow a dark edge. The outline doubles as a contrast
+ * guarantee: a gradient name reads on any background once it has a hard edge.
  */
 export function nameGradientTextStyle(
-  gradient: Pick<NameGradient, 'colors' | 'segmented'> & {solid?: string},
+  gradient: NameGradientSpec,
   opts?: {outline?: boolean},
 ): TextStyle {
+  const edge = opts?.outline ? outlineColorFor(gradient.colors) : undefined
+
+  if (gradient.colors.length < 2) {
+    const flat: TextStyle & {filter?: string} = {color: gradient.solid}
+    if (edge) flat.filter = edgeShadow(edge)
+    return flat
+  }
+
   const stops = gradient.segmented
     ? gradient.colors
         .map((color, index) => {
@@ -24,7 +40,7 @@ export function nameGradientTextStyle(
           return `${color} ${start}% ${end}%`
         })
         .join(', ')
-    : gradient.colors.join(', ')
+    : gradientSamples(gradient.colors, SAMPLE_COUNT).join(', ')
 
   const base: Record<string, unknown> = {
     backgroundImage: `linear-gradient(90deg, ${stops})`,
@@ -34,19 +50,24 @@ export function nameGradientTextStyle(
     WebkitTextFillColor: 'transparent',
   }
 
-  if (opts?.outline) {
-    const color = '#050408'
-    const width = 2
-    return {
-      ...base,
-      filter: [
-        `drop-shadow(${width}px 0 0 ${color})`,
-        `drop-shadow(-${width}px 0 0 ${color})`,
-        `drop-shadow(0 ${width}px 0 ${color})`,
-        `drop-shadow(0 -${width}px 0 ${color})`,
-      ].join(' '),
-    }
+  if (edge) {
+    return {...base, filter: edgeShadow(edge)}
   }
 
-  return {...base, textShadow: '0 0 1px rgba(0,0,0,0.06)'} as TextStyle
+  return {
+    ...base,
+    // Not in RN's TextStyle, but react-native-web forwards it to the DOM.
+    textShadow: '0 0 1px rgba(0,0,0,0.06)',
+  } as TextStyle
+}
+
+/** Four axis-aligned drop shadows, the cheapest hard text edge on the web. */
+function edgeShadow(color: string) {
+  const width = 2
+  return [
+    `drop-shadow(${width}px 0 0 ${color})`,
+    `drop-shadow(-${width}px 0 0 ${color})`,
+    `drop-shadow(0 ${width}px 0 ${color})`,
+    `drop-shadow(0 -${width}px 0 ${color})`,
+  ].join(' ')
 }
