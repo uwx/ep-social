@@ -8,6 +8,9 @@ import {normalizeHex} from '#/features/avatarDecorations/oklch'
 /** Diameter of the chip that fronts the hex box. */
 export const SWATCH_SIZE = 32
 
+/** Color the pickers open at when the stored value cannot be parsed. */
+export const FALLBACK_COLOR = '#7c3aed'
+
 /**
  * The visible chip. Platforms differ only in what a press does, so the chip
  * itself is shared to keep the field looking the same on both.

@@ -9,10 +9,7 @@ import * as Dialog from '#/components/Dialog'
 import {Pressable} from '#/components/Pressable'
 import {Text} from '#/components/Typography'
 import {normalizeHex} from '#/features/avatarDecorations/oklch'
-import {ColorFieldRow, swatchStyle} from './shared'
-
-/** Color the picker opens at when the stored value cannot be parsed. */
-const FALLBACK = '#7c3aed'
+import {ColorFieldRow, FALLBACK_COLOR, swatchStyle} from './shared'
 
 /**
  * Solid color editor: a swatch that opens the color picker plus a hex box for
@@ -71,7 +68,7 @@ export function DecorationColorField({
         <Dialog.Close />
         <ColorPickerBody
           label={label}
-          initialColor={normalizeHex(openColor) ?? FALLBACK}
+          initialColor={normalizeHex(openColor) ?? FALLBACK_COLOR}
           onChange={onChange}
         />
       </Dialog.Outer>

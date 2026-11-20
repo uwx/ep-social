@@ -110,9 +110,14 @@ or a custom solid or a preset, never two.
 Color entry is a swatch plus a hex box (`DecorationColorField`), so the picker
 never gets between the user and an exact value; the record stores `#rrggbb`.
 Native opens `reanimated-color-picker` in a dialog. The web bundle bans
-react-native-gesture-handler, which that picker imports, so on web the swatch
-carries a transparent `<input type="color">` and the browser's own picker feeds
-the same slot.
+react-native-gesture-handler, which that picker imports, so the web field
+(`index.web.tsx`) opens `@terrazzo/react-color-picker` - an OKLCH picker whose
+channel sliders are WebGL2 - pinned to 0.3.0. That package's CSS follows the OS
+color scheme and leaves semantic variables undefined, so `terrazzoTheme.ts`
+maps them onto the active ALF theme while the dialog is open. Browsers without
+WebGL2 (jsdom included) would unmount the dialog when the shader init throws,
+so `canvasSupport.ts` gates it and those browsers get a transparent
+`<input type="color">` over the swatch instead.
 
 ## Regenerating the font catalog
 

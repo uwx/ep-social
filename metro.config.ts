@@ -82,6 +82,15 @@ let config = getSentryExpoConfig(import.meta.dirname, {
         )
       }
       /*
+       * @terrazzo/tiles (pulled in by the web color picker) imports `shiki` from
+       * its Demo component to syntax-highlight code samples we never render.
+       * Shiki is ~10 MB of grammars and themes, and it is ESM-only, so resolving
+       * it breaks the web build. An empty module keeps the graph small.
+       */
+      if (platform === 'web' && /^shiki(\/|$)/.test(moduleName)) {
+        return {type: 'empty'}
+      }
+      /*
        * react-native-webview has no web implementation (its fallback renders
        * "does not support this platform"), so swap in react-native-web-webview
        * to keep external media embeds working. Mirrors the old webpack alias.

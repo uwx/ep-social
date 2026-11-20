@@ -31,16 +31,23 @@ function walk(dir) {
 let fixed = 0
 for (const path of walk(OUT)) {
   const before = readFileSync(path, 'utf8')
-  const after = before.replace(
-    /(from\s+(["']))([^"']*)(\2)/g,
-    (_, head, _quote, spec, close) =>
-      head +
-      spec
-        .replaceAll('\\', '/')
-        .replaceAll("''", '')
-        .replace(/\/{2,}/g, '/') +
-      close,
-  )
+  /*
+   * `--import-ext ''` leaves the extension quotes adjacent to the specifier
+   * (`from "./app''"`), so the specifier capture below never reaches the
+   * closing quote. Strip that residue first.
+   */
+  const after = before
+    .replace(/''(?=["'])/g, '')
+    .replace(
+      /(from\s+(["']))([^"']*)(\2)/g,
+      (_, head, _quote, spec, close) =>
+        head +
+        spec
+          .replaceAll('\\', '/')
+          .replaceAll("''", '')
+          .replace(/\/{2,}/g, '/') +
+        close,
+    )
   if (after !== before) {
     writeFileSync(path, after)
     fixed++
