@@ -128,8 +128,7 @@ function ColorPickerBody({
   useTerrazzoTheme(t)
 
   // Opening in OKLCH keeps the sliders on L/C/H rather than r/g/b.
-  const [initialCss] = useState(() => oklchCss(initialColor))
-  const [color, setColor] = useColor(initialCss)
+  const [color, setColor] = useColor(oklchCss(initialColor))
   const emitted = useRef(normalizeHex(initialColor))
 
   /*
