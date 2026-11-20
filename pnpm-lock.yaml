@@ -769,6 +769,9 @@ importers:
       react-textarea-autosize:
         specifier: ^8.5.3
         version: 8.5.9(@types/react@19.3.0)(react@19.3.0)
+      reanimated-color-picker:
+        specifier: 5.1.4
+        version: 5.1.4(665dbfb2758e337388c40f0398d20a66)
       setimmediate:
         specifier: ^1.0.5
         version: 1.0.5
@@ -9622,6 +9625,18 @@ packages:
 
   real-require@1.0.0:
     resolution: {integrity: sha512-P4nbQYQfePJxRSmY+v/KINxVucm4NF3p3s7pJveMTtom52FR4YGltUQLB8idDXwDDWW+eYrWDFbuzUnjoWHF7g==}
+
+  reanimated-color-picker@5.1.4:
+    resolution: {integrity: sha512-u5kjB3CK0aQPXrvzCzdLNwjItUTyokk7wQDt+5u1yCH41x8v67OSHYJdc9MMG2sm5tasNe5BqK0hprRTQnVKcw==}
+    peerDependencies:
+      expo: '>=44.0.0'
+      react: '*'
+      react-native: '*'
+      react-native-gesture-handler: '>=2.0.0'
+      react-native-reanimated: 4.7.1
+    peerDependenciesMeta:
+      expo:
+        optional: true
 
   redent@3.0.0:
     resolution: {integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==}
@@ -20728,6 +20743,15 @@ snapshots:
   real-require@0.2.0: {}
 
   real-require@1.0.0: {}
+
+  reanimated-color-picker@5.1.4(665dbfb2758e337388c40f0398d20a66):
+    dependencies:
+      react: 19.3.0
+      react-native: 0.88.0(patch_hash=7fad2ee5144693e6dd7d373860a204007c0a1e2a2d5180e068d214589335970a)(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.3.0)(react@19.3.0)(supports-color@10.2.2)
+      react-native-gesture-handler: 3.3.0(react-native@0.88.0(patch_hash=7fad2ee5144693e6dd7d373860a204007c0a1e2a2d5180e068d214589335970a)(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.3.0)(react@19.3.0)(supports-color@10.2.2))(react@19.3.0)
+      react-native-reanimated: 4.7.1(patch_hash=557541b187597797db03adf716a768717a574dbdff8b221683f4b3f7bd912185)(react-native-worklets@0.13.0(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(react-native@0.88.0(patch_hash=7fad2ee5144693e6dd7d373860a204007c0a1e2a2d5180e068d214589335970a)(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.3.0)(react@19.3.0)(supports-color@10.2.2))(react@19.3.0)(supports-color@10.2.2))(react-native@0.88.0(patch_hash=7fad2ee5144693e6dd7d373860a204007c0a1e2a2d5180e068d214589335970a)(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/metro-config@0.88.0(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.3.0)(react@19.3.0)(supports-color@10.2.2))(react@19.3.0)
+    optionalDependencies:
+      expo: 58.0.14(patch_hash=0208b099bee03d1d30dddfe51b3a1598db2180fa85ae9a9c032a296cb0cb006f)(2e0d76eba7f6ea6081d444597a30bbe8)
 
   redent@3.0.0:
     dependencies:

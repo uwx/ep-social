@@ -301,6 +301,7 @@
     "react-remove-scroll-bar": "^2.3.8",
     "react-responsive": "^10.0.1",
     "react-textarea-autosize": "^8.5.3",
+    "reanimated-color-picker": "5.1.4",
     "setimmediate": "^1.0.5",
     "slugify": "^1.6.9",
     "sonner": "^2.0.7",

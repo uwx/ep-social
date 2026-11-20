@@ -86,14 +86,31 @@ jest.mock('#/features/avatarDecorations', () => {
 jest.mock('#/lib/haptics', () => ({
   useHaptics: () => ({selection: jest.fn(), tap: jest.fn()}),
 }))
-jest.mock('#/components/Dialog', () => ({
-  useDialogControl: () => ({open: jest.fn(), close: jest.fn()}),
-  useDialogContext: () => ({close: jest.fn()}),
-  Outer: ({children}: {children?: React.ReactNode}) => children ?? null,
-  Handle: () => null,
-  Close: () => null,
-  InnerFlatList: () => null,
-}))
+jest.mock('#/components/Dialog', () => {
+  const react: typeof import('react') = jest.requireActual('react')
+  const rn: typeof import('react-native') = jest.requireActual('react-native')
+  const {createElement: h} = react
+  const {View} = rn
+  const Pass = ({children}: {children?: React.ReactNode}) =>
+    h(View, null, children)
+  return {
+    useDialogControl: () => ({open: jest.fn(), close: jest.fn()}),
+    useDialogContext: () => ({close: jest.fn()}),
+    Outer: Pass,
+    Handle: () => null,
+    Close: () => null,
+    ScrollableInner: Pass,
+    InnerFlatList: () => null,
+  }
+})
+jest.mock('reanimated-color-picker', () => {
+  return {
+    __esModule: true,
+    default: ({children}: {children?: React.ReactNode}) => children ?? null,
+    Panel1: () => null,
+    HueSlider: () => null,
+  }
+})
 jest.mock('#/view/com/util/UserAvatar', () => {
   const react: typeof import('react') = jest.requireActual('react')
   const rn: typeof import('react-native') = jest.requireActual('react-native')
@@ -118,7 +135,8 @@ jest.mock('#/components/Layout', () => {
   const rn: typeof import('react-native') = jest.requireActual('react-native')
   const {createElement: h} = react
   const {View} = rn
-  const Pass = ({children}: {children?: React.ReactNode}) => h(View, null, children)
+  const Pass = ({children}: {children?: React.ReactNode}) =>
+    h(View, null, children)
   return {
     Screen: Pass,
     Content: Pass,
@@ -190,9 +208,6 @@ jest.mock('#/components/Typography', () => {
   return {Text: rn.Text}
 })
 jest.mock('#/components/Loader', () => ({Loader: () => null}))
-// The native slider package needs a host environment the test renderer lacks;
-// these tests drive the color field through its hex input.
-jest.mock('#/components/forms/Slider', () => ({Slider: () => null}))
 jest.mock('#/components/Toast', () => ({show: jest.fn()}))
 jest.mock('#/components/Admonition', () => ({
   Admonition: ({children}: {children: React.ReactNode}) => children,
@@ -320,7 +335,12 @@ it('clears a slot by choosing None', () => {
   fireEvent.press(getByLabelText('Save'))
 
   expect(mockMutate).toHaveBeenCalledWith(
-    {avatar: undefined, name: undefined, avatarShape: undefined, nameOutline: false},
+    {
+      avatar: undefined,
+      name: undefined,
+      avatarShape: undefined,
+      nameOutline: false,
+    },
     expect.anything(),
   )
 })

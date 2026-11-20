@@ -49,7 +49,10 @@ export function DecorationNamePaintEditor({
       onChange({
         nameColor: undefined,
         nameGradient: {
-          colors: [first, first === DEFAULT_SECOND ? DEFAULT_THIRD : DEFAULT_SECOND],
+          colors: [
+            first,
+            first === DEFAULT_SECOND ? DEFAULT_THIRD : DEFAULT_SECOND,
+          ],
           hard: false,
         },
       })
@@ -170,9 +173,7 @@ export function DecorationNamePaintEditor({
             name="decoration_gradient_hard"
             label={l`Hard edges`}
             value={!!nameGradient.hard}
-            onChange={hard =>
-              onChange({nameGradient: {...nameGradient, hard}})
-            }
+            onChange={hard => onChange({nameGradient: {...nameGradient, hard}})}
             style={[a.w_full]}>
             <Toggle.LabelText style={[a.flex_1]}>
               <Trans>Hard edges</Trans>

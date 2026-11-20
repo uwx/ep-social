@@ -107,9 +107,12 @@ record, so untouched slots must be carried over and cleared slots omitted. It
 also enforces one name paint at a time, so a record can hold a custom gradient
 or a custom solid or a preset, never two.
 
-Color entry is hex plus L/C/H sliders (`DecorationColorField`). Sliders move in
-OKLCH and gamut-map back to sRGB, so every position lands on a renderable
-color; the record still stores `#rrggbb` for interop.
+Color entry is a swatch plus a hex box (`DecorationColorField`), so the picker
+never gets between the user and an exact value; the record stores `#rrggbb`.
+Native opens `reanimated-color-picker` in a dialog. The web bundle bans
+react-native-gesture-handler, which that picker imports, so on web the swatch
+carries a transparent `<input type="color">` and the browser's own picker feeds
+the same slot.
 
 ## Regenerating the font catalog
 
