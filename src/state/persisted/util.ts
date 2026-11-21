@@ -140,6 +140,7 @@ export function normalizeData(data: Schema) {
   const imageCdnPresets = [
     'https://porxie-bsky.dollware.net',
     'https://luna.madebydanny.uk',
+    'https://cdn.coffeencode.cc',
   ]
   const plcDirectoryPresets = [
     'https://plc.directory',

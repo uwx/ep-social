@@ -70,6 +70,7 @@ import {RunesScreenLayout} from './components/RunesScreenLayout'
 const IMAGE_CDN_PRESETS = [
   'https://porxie-bsky.dollware.net',
   'https://luna.madebydanny.uk',
+  'https://cdn.coffeencode.cc',
 ] as const
 
 const APP_SERVER_CDN_ORIGIN = 'https://cdn.bsky.app'
@@ -174,6 +175,7 @@ export function RunesInfrastructureSettingsScreen() {
     {value: 'default', label: l`App server default`},
     {value: IMAGE_CDN_PRESETS[0], label: l`Dollware Porxie`},
     {value: IMAGE_CDN_PRESETS[1], label: l`Luna`},
+    {value: IMAGE_CDN_PRESETS[2], label: l`atCDN`},
     {value: 'custom', label: l`Custom`},
   ]
 
