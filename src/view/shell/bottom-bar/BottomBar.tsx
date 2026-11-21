@@ -35,7 +35,7 @@ import {useSession} from '#/state/session'
 import {useLoggedOutViewControls} from '#/state/shell/logged-out'
 import {useShellLayout} from '#/state/shell/shell-layout'
 import {useCloseAllActiveElements} from '#/state/util'
-import {getSquareAvatarRadius, UserAvatar} from '#/view/com/util/UserAvatar'
+import {resolveAvatarShape, UserAvatar} from '#/view/com/util/UserAvatar'
 import {Logo} from '#/view/icons/Logo'
 import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, useTheme} from '#/alf'
@@ -65,6 +65,7 @@ import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
 import {useAgeAssurance} from '#/ageAssurance'
 import {useAnalytics} from '#/analytics'
+import {useAvatarDecoration, useAvatarShape} from '#/features/avatarDecorations'
 import {isFollowingV2HomeDotEnabled} from '#/features/followingV2/eligibility'
 import {useActorStatus} from '#/features/liveNow'
 import {accentForeground} from '#/features/themes/accentForeground'
@@ -178,8 +179,42 @@ export function BottomBar({navigation}: BottomTabBarProps) {
   const [demoMode] = useDemoMode()
   const {isActive: live} = useActorStatus(profile)
   const isLabeler = profile?.associated?.labeler
+  const decoration = useAvatarDecoration(
+    demoMode ? undefined : currentAccount?.did,
+  )
+  const profileShape = useAvatarShape(
+    demoMode ? undefined : currentAccount?.did,
+  )
 
   const enableSquareAvatars = useEnableSquareAvatars()
+  const avatarSize = iconWidth - (isAtMyProfile ? 3 : 2)
+  const {
+    shape: avatarShape,
+    radius: avatarRadius,
+    hexagon: avatarIsHexagon,
+  } = resolveAvatarShape({
+    size: avatarSize,
+    type: isLabeler ? 'labeler' : 'user',
+    profileShape,
+    squareAvatars: enableSquareAvatars,
+  })
+  // A hexagon cannot take a rounded-rect ring, so the active ring around it is
+  // a circle. The border keeps the icon's footprint in every state.
+  const ringWidth = isAtMyProfile
+    ? live
+      ? 0
+      : enableSquareAvatars
+        ? 1.5
+        : 1
+    : 1
+  // The wrapper follows the avatar's own radius; a circle is a clamp rather
+  // than a measured radius, and sharp avatars have no rounding to follow.
+  const ringRadius =
+    avatarIsHexagon || avatarShape === 'circle'
+      ? 100
+      : avatarShape === 'sharp'
+        ? 0
+        : avatarRadius + ringWidth
 
   return (
     <>
@@ -345,45 +380,25 @@ export function BottomBar({navigation}: BottomTabBarProps) {
                   <View
                     style={[
                       styles.ctrlIcon,
-                      isLabeler ? styles.profileIconSquare : styles.profileIcon,
-                      isAtMyProfile && [
-                        isLabeler
-                          ? styles.onProfileSquare
-                          : getShapeStyle(
-                              enableSquareAvatars,
-                              styles.onProfileSquare,
-                              styles.onProfile,
-                            ),
-                        {
-                          borderColor: t.atoms.text.color,
-                          borderWidth: live ? 0 : enableSquareAvatars ? 1.5 : 1,
-                        },
-                      ],
-                      (enableSquareAvatars || isLabeler) && {
-                        borderRadius:
-                          getSquareAvatarRadius(
-                            iconWidth - (isAtMyProfile ? 3 : 2),
-                            enableSquareAvatars,
-                          ) +
-                          (enableSquareAvatars === 'sharp'
-                            ? 0
-                            : isAtMyProfile
-                              ? live
-                                ? 0
-                                : enableSquareAvatars
-                                  ? 1.5
-                                  : 1
-                              : 1),
+                      {
+                        borderWidth: ringWidth,
+                        borderColor:
+                          isAtMyProfile && !avatarIsHexagon
+                            ? t.atoms.text.color
+                            : 'transparent',
+                        borderRadius: ringRadius,
                       },
                     ]}>
                     <UserAvatar
                       avatar={demoMode ? BOTTOM_BAR_AVI : profile?.avatar}
-                      size={iconWidth - (isAtMyProfile ? 3 : 2)}
+                      size={avatarSize}
                       // See https://github.com/bluesky-social/social-app/pull/1801:
                       usePlainRNImage={true}
-                      type={profile?.associated?.labeler ? 'labeler' : 'user'}
+                      type={isLabeler ? 'labeler' : 'user'}
                       live={live}
                       hideLiveBadge
+                      decoration={decoration}
+                      profileShape={profileShape}
                     />
                   </View>
                 </View>

@@ -86,6 +86,57 @@ export function getSquareAvatarRadius(
 
 export type UserAvatarType = 'user' | 'algo' | 'list' | 'labeler'
 
+type ResolvedAvatarShape = {
+  /** Corner shape after the owner's choice and the viewer's preference. */
+  shape: 'circle' | 'square' | 'sharp'
+  /** Corner radius inside the avatar bounds; 0 for a hexagon. */
+  radius: number
+  /** The avatar is drawn as a clipped hexagon path rather than a rounded rect. */
+  hexagon: boolean
+}
+
+/**
+ * Resolves the corner shape an avatar renders with. A profile's own shape
+ * choice wins over the viewer's avatar preference, but still follows it for
+ * corner sharpness so nobody loses their sharp mode.
+ */
+export function resolveAvatarShape({
+  size,
+  type = 'user',
+  shape,
+  profileShape,
+  squareAvatars,
+  blurred = false,
+}: {
+  size: number
+  type?: UserAvatarType
+  shape?: 'circle' | 'square' | 'sharp'
+  profileShape?: AvatarShape
+  squareAvatars: ShapePreference
+  /** A blurred avatar never renders the owner's shape. */
+  blurred?: boolean
+}): ResolvedAvatarShape {
+  const finalShape: ResolvedAvatarShape['shape'] = profileShape
+    ? profileShape === 'circle'
+      ? 'circle'
+      : squareAvatars === 'sharp'
+        ? 'sharp'
+        : 'square'
+    : squareAvatars === 'sharp'
+      ? 'sharp'
+      : (shape ??
+        (type === 'user' ? (squareAvatars ? 'square' : 'circle') : 'square'))
+  const hexagon = profileShape === 'hexagon' && !blurred
+  const radius = hexagon
+    ? 0
+    : profileShape === 'squircle'
+      ? Math.round(size * 0.25)
+      : finalShape !== 'circle'
+        ? getSquareAvatarRadius(size, finalShape === 'sharp' ? 'sharp' : true)
+        : Math.floor(size / 2)
+  return {shape: finalShape, radius, hexagon}
+}
+
 interface BaseUserAvatarProps {
   type?: UserAvatarType
   shape?: 'circle' | 'square' | 'sharp'
@@ -312,48 +363,26 @@ let UserAvatar = ({
   const t = useTheme()
 
   const enableSquareAvatars = useEnableSquareAvatars()
-  const avishapeforce =
-    enableSquareAvatars === 'sharp'
-      ? 'sharp'
-      : enableSquareAvatars
-        ? 'square'
-        : 'circle'
-
-  // A profile's own shape choice wins over the viewer's avatar preference, but
-  // still follows it for corner sharpness so nobody loses their sharp mode.
-  const finalShape: 'circle' | 'square' | 'sharp' = profileShape
-    ? profileShape === 'circle'
-      ? 'circle'
-      : enableSquareAvatars === 'sharp'
-        ? 'sharp'
-        : 'square'
-    : enableSquareAvatars === 'sharp'
-      ? 'sharp'
-      : (overrideShape ?? (type === 'user' ? avishapeforce : 'square'))
-  const hexagon = profileShape === 'hexagon' && !moderation?.blur
+  const {
+    shape: finalShape,
+    radius: avatarRadius,
+    hexagon,
+  } = resolveAvatarShape({
+    size,
+    type,
+    shape: overrideShape,
+    profileShape,
+    squareAvatars: enableSquareAvatars,
+    blurred: !!moderation?.blur,
+  })
   const thumbnailFormat = useThumbnailFormat()
   const imageCdnHost = useImageCdnHost()
 
   const aviStyle = useMemo(() => {
-    let borderRadius
-
-    if (profileShape === 'hexagon' && !moderation?.blur) {
-      borderRadius = 0
-    } else if (profileShape === 'squircle') {
-      borderRadius = Math.round(size * 0.25)
-    } else if (finalShape !== 'circle') {
-      borderRadius = getSquareAvatarRadius(
-        size,
-        finalShape === 'sharp' ? 'sharp' : true,
-      )
-    } else {
-      borderRadius = Math.floor(size / 2)
-    }
-
     return {
       width: size,
       height: size,
-      borderRadius,
+      borderRadius: avatarRadius,
       ...(profileShape === 'squircle'
         ? {borderCurve: 'continuous' as const}
         : {}),
@@ -361,7 +390,7 @@ let UserAvatar = ({
       ...extraAviStyle,
       ...(finalShape === 'sharp' && SHARP_CORNERS),
     }
-  }, [finalShape, profileShape, size, t, extraAviStyle, moderation?.blur])
+  }, [avatarRadius, finalShape, profileShape, size, t, extraAviStyle])
 
   const borderStyle = useMemo(() => {
     return [
@@ -465,27 +494,28 @@ let UserAvatar = ({
   return avatar &&
     !(moderation?.blur && IS_ANDROID /* android crashes with blur */) ? (
     <View style={containerStyle}>
-      {hexagonImage ?? (usePlainRNImage ? (
-        <RNImage
-          accessibilityIgnoresInvertColors
-          testID="userAvatarImage"
-          style={aviStyle}
-          resizeMode="cover"
-          source={{uri: imageUri}}
-          blurRadius={moderation?.blur ? BLUR_AMOUNT : 0}
-          onLoad={onLoad}
-        />
-      ) : (
-        <ExpoImage
-          testID="userAvatarImage"
-          style={aviStyle}
-          contentFit="cover"
-          source={{uri: imageUri}}
-          blurRadius={moderation?.blur ? BLUR_AMOUNT : 0}
-          onLoad={onLoad}
-          useAppleWebpCodec
-        />
-      ))}
+      {hexagonImage ??
+        (usePlainRNImage ? (
+          <RNImage
+            accessibilityIgnoresInvertColors
+            testID="userAvatarImage"
+            style={aviStyle}
+            resizeMode="cover"
+            source={{uri: imageUri}}
+            blurRadius={moderation?.blur ? BLUR_AMOUNT : 0}
+            onLoad={onLoad}
+          />
+        ) : (
+          <ExpoImage
+            testID="userAvatarImage"
+            style={aviStyle}
+            contentFit="cover"
+            source={{uri: imageUri}}
+            blurRadius={moderation?.blur ? BLUR_AMOUNT : 0}
+            onLoad={onLoad}
+            useAppleWebpCodec
+          />
+        ))}
       {!noBorder && !hexagon && <MediaInsetBorder style={borderStyle} />}
       {!hexagon && decorationRing}
       {live && size > 16 && !hideLiveBadge && (
@@ -792,31 +822,14 @@ let PreviewableUserAvatar = ({
   )
 
   const linkStyle = {
-    borderRadius:
-      profileShape === 'hexagon'
-        ? 0
-        : profileShape === 'squircle'
-          ? Math.round(props.size * 0.25)
-          : profileShape === 'circle'
-            ? Math.floor(props.size / 2)
-            : profileShape === 'square'
-              ? getSquareAvatarRadius(
-                  props.size,
-                  enableSquareAvatars === 'sharp' ? 'sharp' : true,
-                )
-              : enableSquareAvatars === 'sharp' || props.shape === 'sharp'
-                ? 0
-                : props.shape === 'circle'
-                  ? Math.floor(props.size / 2)
-                  : props.shape === 'square' ||
-                      props.type === 'algo' ||
-                      props.type === 'list'
-                    ? getSquareAvatarRadius(props.size, enableSquareAvatars)
-                    : getShapeRadius(
-                        enableSquareAvatars,
-                        getSquareAvatarRadius(props.size),
-                        Math.floor(props.size / 2),
-                      ),
+    borderRadius: resolveAvatarShape({
+      size: props.size,
+      type: props.type,
+      shape: props.shape,
+      profileShape,
+      squareAvatars: enableSquareAvatars,
+      blurred: !!moderation?.blur,
+    }).radius,
   }
 
   return (

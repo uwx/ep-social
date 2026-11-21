@@ -62,23 +62,5 @@ export const styles = StyleSheet.create({
     top: -1,
   },
   bellIcon: {},
-  profileIcon: {
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  profileIconSquare: {
-    borderRadius: 3,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
   messagesIcon: {},
-  onProfile: {
-    borderWidth: 1,
-    borderRadius: 100,
-  },
-  onProfileSquare: {
-    borderWidth: 1,
-    borderRadius: 3,
-  },
 })

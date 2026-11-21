@@ -37,7 +37,7 @@ import {useLoggedOutViewControls} from '#/state/shell/logged-out'
 import {useShellLayout} from '#/state/shell/shell-layout'
 import {useCloseAllActiveElements} from '#/state/util'
 import {Link} from '#/view/com/util/Link'
-import {getSquareAvatarRadius, UserAvatar} from '#/view/com/util/UserAvatar'
+import {resolveAvatarShape, UserAvatar} from '#/view/com/util/UserAvatar'
 import {Logo} from '#/view/icons/Logo'
 import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, useTheme} from '#/alf'
@@ -64,6 +64,7 @@ import {Text} from '#/components/Typography'
 import {useAgeAssurance} from '#/ageAssurance'
 import {useAnalytics} from '#/analytics'
 import {IS_WEB_TOUCH_DEVICE} from '#/env'
+import {useAvatarDecoration, useAvatarShape} from '#/features/avatarDecorations'
 import {isFollowingV2HomeDotEnabled} from '#/features/followingV2/eligibility'
 import {accentForeground} from '#/features/themes/accentForeground'
 import {router} from '#/routes'
@@ -84,7 +85,6 @@ export function BottomBarWeb() {
   const accountSwitchControl = useDialogControl()
   const {data: profile} = useProfileQuery({did: currentAccount?.did})
   const enableSquareAvatars = useEnableSquareAvatars()
-  const iconWidth = 26
 
   const unreadMessageCount = useUnreadMessageCount()
   const notificationCountStr = useUnreadNotifications()
@@ -102,6 +102,21 @@ export function BottomBarWeb() {
   const ax = useAnalytics()
   const aa = useAgeAssurance()
   const isLabeler = profile?.associated?.labeler
+  const decoration = useAvatarDecoration(currentAccount?.did)
+  const profileShape = useAvatarShape(currentAccount?.did)
+
+  const iconWidth = 26
+  const avatarSize = iconWidth - 3
+  const {
+    shape: avatarShape,
+    radius: avatarRadius,
+    hexagon: avatarIsHexagon,
+  } = resolveAvatarShape({
+    size: avatarSize,
+    type: isLabeler ? 'labeler' : 'user',
+    profileShape,
+    squareAvatars: enableSquareAvatars,
+  })
 
   const showSignIn = useCallback(() => {
     closeAllActiveElements()
@@ -251,36 +266,30 @@ export function BottomBarWeb() {
                       <View
                         style={[
                           styles.ctrlIcon,
-                          isLabeler
-                            ? styles.profileIconSquare
-                            : styles.profileIcon,
-                          isActive && [
-                            enableSquareAvatars
-                              ? styles.onProfileSquare
-                              : isLabeler
-                                ? styles.onProfileSquare
-                                : styles.onProfile,
-                            {borderColor: t.atoms.text.color, borderWidth: 2},
-                          ],
-                          (enableSquareAvatars || isLabeler) && {
+                          {
+                            // A hexagon cannot take a rounded-rect ring, so
+                            // the active ring around it is a circle.
+                            borderWidth: isActive ? 2 : 1,
+                            borderColor: isActive
+                              ? t.atoms.text.color
+                              : 'transparent',
+                            // The wrapper follows the avatar's own radius; a
+                            // circle is a clamp, and sharp avatars have no
+                            // rounding to follow.
                             borderRadius:
-                              getSquareAvatarRadius(
-                                iconWidth - 3,
-                                enableSquareAvatars,
-                              ) +
-                              (enableSquareAvatars === 'sharp'
-                                ? 0
-                                : isActive
-                                  ? 2
-                                  : 1),
+                              avatarIsHexagon || avatarShape === 'circle'
+                                ? 100
+                                : avatarShape === 'sharp'
+                                  ? 0
+                                  : avatarRadius + (isActive ? 2 : 1),
                           },
                         ]}>
                         <UserAvatar
                           avatar={profile?.avatar}
-                          size={iconWidth - 3}
-                          type={
-                            profile?.associated?.labeler ? 'labeler' : 'user'
-                          }
+                          size={avatarSize}
+                          type={isLabeler ? 'labeler' : 'user'}
+                          decoration={decoration}
+                          profileShape={profileShape}
                         />
                       </View>
                     </View>
