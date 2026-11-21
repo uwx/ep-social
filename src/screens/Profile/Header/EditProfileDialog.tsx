@@ -30,6 +30,10 @@ import {Button, ButtonIcon, ButtonText} from '#/components/Button'
 import * as Dialog from '#/components/Dialog'
 import * as TextField from '#/components/forms/TextField'
 import * as Toggle from '#/components/forms/Toggle'
+import {ChevronRight_Stroke2_Corner0_Rounded as ChevronRightIcon} from '#/components/icons/Chevron'
+import {type Props as SVGIconProps} from '#/components/icons/common'
+import {Person_Stroke2_Corner2_Rounded as PersonIcon} from '#/components/icons/Person'
+import {Sparkle_Stroke2_Corner0_Rounded as SparkleIcon} from '#/components/icons/Sparkle'
 import {InlineLinkText} from '#/components/Link'
 import {Loader} from '#/components/Loader'
 import * as Prompt from '#/components/Prompt'
@@ -51,6 +55,7 @@ import {
   useWriteProfileLinks,
 } from '#/features/profileLinks'
 import {type app} from '#/lexicons'
+import {navigate} from '#/Navigation'
 
 const PRONOUNS_MAX_GRAPHEMES = 20
 
@@ -89,14 +94,32 @@ export function EditProfileDialog({
   const cancelControl = Dialog.useDialogControl()
   const [dirty, setDirty] = useState(false)
   const [isPresented, setIsPresented] = useState(false)
+  /*
+   * Set when the discard prompt was opened by a navigation link, so confirming
+   * it opens the destination screen instead of just closing.
+   */
+  const pendingNavigation = useRef<(() => void) | null>(null)
 
   const onPressCancel = useCallback(() => {
+    pendingNavigation.current = null
     if (dirty) {
       cancelControl.open()
     } else {
       control.close()
     }
   }, [dirty, control, cancelControl])
+
+  const onNavigateAway = useCallback(
+    (navigateTo: () => void) => {
+      if (dirty) {
+        pendingNavigation.current = navigateTo
+        cancelControl.open()
+      } else {
+        control.close(navigateTo)
+      }
+    },
+    [dirty, control, cancelControl],
+  )
 
   return (
     <Dialog.Outer
@@ -111,13 +134,7 @@ export function EditProfileDialog({
         },
       }}
       webOptions={{
-        onBackgroundPress: () => {
-          if (dirty) {
-            cancelControl.open()
-          } else {
-            control.close()
-          }
-        },
+        onBackgroundPress: onPressCancel,
       }}
       testID="editProfileModal">
       <DialogInner
@@ -125,6 +142,7 @@ export function EditProfileDialog({
         onUpdate={onUpdate}
         setDirty={setDirty}
         onPressCancel={onPressCancel}
+        onNavigateAway={onNavigateAway}
         isPresented={isPresented}
       />
 
@@ -132,7 +150,11 @@ export function EditProfileDialog({
         control={cancelControl}
         title={l`Discard changes?`}
         description={l`Are you sure you want to discard your changes?`}
-        onConfirm={() => control.close()}
+        onConfirm={() => {
+          const navigateTo = pendingNavigation.current
+          pendingNavigation.current = null
+          control.close(navigateTo ?? undefined)
+        }}
         confirmButtonCta={l`Discard`}
         confirmButtonColor="negative"
       />
@@ -145,12 +167,14 @@ function DialogInner({
   onUpdate,
   setDirty,
   onPressCancel,
+  onNavigateAway,
   isPresented,
 }: {
   profile: app.bsky.actor.defs.ProfileViewDetailed
   onUpdate?: () => void
   setDirty: (dirty: boolean) => void
   onPressCancel: () => void
+  onNavigateAway: (navigateTo: () => void) => void
   isPresented: boolean
 }) {
   const {t: l} = useLingui()
@@ -647,6 +671,30 @@ function DialogInner({
             }}
           />
         )}
+
+        <View style={[a.gap_sm]}>
+          <TextField.LabelText>
+            <Trans>More settings</Trans>
+          </TextField.LabelText>
+          <SettingsShortcut
+            icon={SparkleIcon}
+            title={l`Profile decorations`}
+            description={l`Avatar shape, frames, and name styles`}
+            onPress={() =>
+              onNavigateAway(() => void navigate('DecorationsSettings'))
+            }
+            testID="editProfileDecorationsLink"
+          />
+          <SettingsShortcut
+            icon={PersonIcon}
+            title={l`Account`}
+            description={l`Handle, email, and password`}
+            onPress={() =>
+              onNavigateAway(() => void navigate('AccountSettings'))
+            }
+            testID="editProfileAccountSettingsLink"
+          />
+        </View>
       </View>
       {isOctober() && userAvatar && (
         <WitchHatEditor
@@ -656,5 +704,53 @@ function DialogInner({
         />
       )}
     </Dialog.ScrollableInner>
+  )
+}
+
+/**
+ * A row that opens a settings screen. Styled to match the dialog's other
+ * bordered rows, with a chevron signalling that it navigates away.
+ */
+function SettingsShortcut({
+  icon: Icon,
+  title,
+  description,
+  onPress,
+  testID,
+}: {
+  icon: React.ComponentType<SVGIconProps>
+  title: string
+  description: string
+  onPress: () => void
+  testID?: string
+}) {
+  const t = useTheme()
+  return (
+    <Button
+      label={title}
+      onPress={onPress}
+      testID={testID}
+      hoverStyle={t.atoms.bg_contrast_100}
+      style={[
+        a.justify_between,
+        a.gap_md,
+        a.rounded_lg,
+        a.border,
+        a.p_md,
+        t.atoms.border_contrast_low,
+        t.atoms.bg_contrast_50,
+      ]}>
+      <View style={[a.flex_row, a.align_center, a.flex_1, a.gap_sm]}>
+        <Icon size="md" style={[{color: t.atoms.text.color}]} />
+        <View style={[a.flex_1, a.gap_2xs]}>
+          <Text style={[a.text_md, a.font_semi_bold]}>{title}</Text>
+          <Text
+            style={[a.text_sm, a.leading_snug, t.atoms.text_contrast_medium]}>
+            {description}
+          </Text>
+        </View>
+      </View>
+      <ChevronRightIcon size="sm" style={[{color: t.palette.contrast_500}]} />
+    </Button>
   )
 }
